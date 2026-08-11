@@ -202,6 +202,138 @@ const hu = {
 
     'results.voteShare':
         'Szavazatarány',
+
+    'admin.metaDescription':
+        'CrumbVote adminisztrációs felület.',
+
+    'admin.administration':
+        'Adminisztráció',
+
+    'admin.publicSite':
+        '← Nyilvános oldal',
+
+    'admin.loading':
+        'CrumbVote ellenőrzése…',
+
+    'admin.loadingDescription':
+        'A beállítás és az adminisztrátori munkamenet ellenőrzése.',
+
+    'admin.loadErrorTitle':
+        'Az adminfelület nem tölthető be',
+
+    'admin.tryAgain':
+        'Újra',
+
+    'admin.setupBadge':
+        'Első beállítás',
+
+    'admin.setupTitle':
+        'CrumbVote beállítása',
+
+    'admin.setupDescription':
+        'Add meg a szerver konzoljában megjelenő egyszer használatos beállítási kódot, majd válassz adminisztrátori jelszót.',
+
+    'admin.setupCode':
+        'Beállítási kód',
+
+    'admin.password':
+        'Adminisztrátori jelszó',
+
+    'admin.showPassword':
+        'Mutat',
+
+    'admin.hidePassword':
+        'Elrejt',
+
+    'admin.passwordMinimum':
+        'Legalább 12 karakter.',
+
+    'admin.confirmPassword':
+        'Jelszó megerősítése',
+
+    'admin.configuring':
+        'Beállítás…',
+
+    'admin.configure':
+        'CrumbVote beállítása',
+
+    'admin.configuredBadge':
+        'A CrumbVote be van állítva',
+
+    'admin.welcomeBack':
+        'Üdv újra',
+
+    'admin.loginDescription':
+        'A folytatáshoz add meg az adminisztrátori jelszót.',
+
+    'admin.signingIn':
+        'Bejelentkezés…',
+
+    'admin.signIn':
+        'Bejelentkezés',
+
+    'admin.sessionCookie':
+        'Az adminisztrátori munkamenet HttpOnly böngészősütiben tárolódik.',
+
+    'admin.errorPasswordMismatch':
+        'A két jelszó nem egyezik.',
+
+    'admin.errorNetwork':
+        'A CrumbVote nem éri el a szervert. Ellenőrizd, hogy a backend fut-e.',
+
+    'admin.errorInvalidSetupCode':
+        'A beállítási kód nem egyezik a CrumbVote szervere által kiírt kóddal.',
+
+    'admin.errorPasswordTooShort':
+        'Válassz legalább 12 karakteres jelszót.',
+
+    'admin.errorPasswordTooLong':
+        'A jelszó túl hosszú.',
+
+    'admin.errorAlreadyConfigured':
+        'A CrumbVote már be van állítva.',
+
+    'admin.errorSetupRequired':
+        'A CrumbVote-ot be kell állítani a bejelentkezés előtt.',
+
+    'admin.errorInvalidCredentials':
+        'A jelszó nem megfelelő.',
+
+    'admin.errorDatabase':
+        'A CrumbVote nem éri el az adatbázist.',
+
+    'admin.errorSetupStateUnavailable':
+        'Az első beállítás állapota nem érhető el. Indítsd újra a CrumbVote-ot, majd próbáld újra.',
+
+    'admin.errorPasswordHashingFailed':
+        'A CrumbVote nem tudta biztonságosan eltárolni a jelszót.',
+
+    'admin.errorPasswordVerificationFailed':
+        'A CrumbVote nem tudta ellenőrizni a jelszót.',
+
+    'admin.errorAuthenticationRequired':
+        'Az adminisztrátori munkamenet lejárt. Jelentkezz be újra.',
+
+    'admin.errorTitleRequired':
+        'Adj címet az eseménynek.',
+
+    'admin.errorTitleTooLong':
+        'Az esemény címe túl hosszú.',
+
+    'admin.errorSlugTooShort':
+        'Az esemény URL-azonosítója legalább 3 karakter legyen.',
+
+    'admin.errorSlugTooLong':
+        'Az esemény URL-azonosítója túl hosszú.',
+
+    'admin.errorInvalidSlug':
+        'Az esemény URL-je csak kisbetűket, számokat és egyszeres kötőjeleket tartalmazhat.',
+
+    'admin.errorDescriptionTooLong':
+        'Az esemény leírása túl hosszú.',
+
+    'admin.errorEventSlugTaken':
+        'Ez az esemény-URL már használatban van. Válassz másikat.',
 } as const
 
 export type TranslationKey =
@@ -397,6 +529,138 @@ const en: Record<
 
     'results.voteShare':
         'Vote share',
+
+    'admin.metaDescription':
+        'CrumbVote administration console.',
+
+    'admin.administration':
+        'Administration',
+
+    'admin.publicSite':
+        '← Public site',
+
+    'admin.loading':
+        'Checking CrumbVote…',
+
+    'admin.loadingDescription':
+        'Verifying setup and administrator session.',
+
+    'admin.loadErrorTitle':
+        "Couldn't load the admin console",
+
+    'admin.tryAgain':
+        'Try again',
+
+    'admin.setupBadge':
+        'First-time setup',
+
+    'admin.setupTitle':
+        'Claim this CrumbVote',
+
+    'admin.setupDescription':
+        'Enter the one-time setup code printed in the server console, then choose the administrator password.',
+
+    'admin.setupCode':
+        'Setup code',
+
+    'admin.password':
+        'Administrator password',
+
+    'admin.showPassword':
+        'Show',
+
+    'admin.hidePassword':
+        'Hide',
+
+    'admin.passwordMinimum':
+        'Minimum 12 characters.',
+
+    'admin.confirmPassword':
+        'Confirm password',
+
+    'admin.configuring':
+        'Configuring…',
+
+    'admin.configure':
+        'Configure CrumbVote',
+
+    'admin.configuredBadge':
+        'CrumbVote is configured',
+
+    'admin.welcomeBack':
+        'Welcome back',
+
+    'admin.loginDescription':
+        'Enter the administrator password to continue.',
+
+    'admin.signingIn':
+        'Signing in…',
+
+    'admin.signIn':
+        'Sign in',
+
+    'admin.sessionCookie':
+        'Administrator sessions are stored in an HttpOnly browser cookie.',
+
+    'admin.errorPasswordMismatch':
+        'The two passwords do not match.',
+
+    'admin.errorNetwork':
+        'CrumbVote could not reach the server. Check that the backend is running.',
+
+    'admin.errorInvalidSetupCode':
+        'That setup code does not match the code printed by the CrumbVote server.',
+
+    'admin.errorPasswordTooShort':
+        'Choose a password with at least 12 characters.',
+
+    'admin.errorPasswordTooLong':
+        'That password is too long.',
+
+    'admin.errorAlreadyConfigured':
+        'CrumbVote has already been configured.',
+
+    'admin.errorSetupRequired':
+        'CrumbVote still needs to be configured before you can sign in.',
+
+    'admin.errorInvalidCredentials':
+        'That password is not correct.',
+
+    'admin.errorDatabase':
+        'CrumbVote could not access its database.',
+
+    'admin.errorSetupStateUnavailable':
+        'The first-run setup state is unavailable. Restart CrumbVote and try again.',
+
+    'admin.errorPasswordHashingFailed':
+        'CrumbVote could not securely store that password.',
+
+    'admin.errorPasswordVerificationFailed':
+        'CrumbVote could not verify the password.',
+
+    'admin.errorAuthenticationRequired':
+        'Your administrator session has expired. Sign in again.',
+
+    'admin.errorTitleRequired':
+        'Give the event a title.',
+
+    'admin.errorTitleTooLong':
+        'The event title is too long.',
+
+    'admin.errorSlugTooShort':
+        'The event URL slug must contain at least 3 characters.',
+
+    'admin.errorSlugTooLong':
+        'The event URL slug is too long.',
+
+    'admin.errorInvalidSlug':
+        'The event URL may only contain lowercase letters, numbers and single hyphens.',
+
+    'admin.errorDescriptionTooLong':
+        'The event description is too long.',
+
+    'admin.errorEventSlugTaken':
+        'That event URL is already being used. Choose another slug.',
 }
 
 const de: Record<
@@ -589,6 +853,138 @@ const de: Record<
 
     'results.voteShare':
         'Stimmenanteil',
+
+    'admin.metaDescription':
+        'CrumbVote-Administrationsoberfläche.',
+
+    'admin.administration':
+        'Administration',
+
+    'admin.publicSite':
+        '← Öffentliche Seite',
+
+    'admin.loading':
+        'CrumbVote wird geprüft…',
+
+    'admin.loadingDescription':
+        'Einrichtung und Administratorsitzung werden überprüft.',
+
+    'admin.loadErrorTitle':
+        'Adminbereich konnte nicht geladen werden',
+
+    'admin.tryAgain':
+        'Erneut versuchen',
+
+    'admin.setupBadge':
+        'Ersteinrichtung',
+
+    'admin.setupTitle':
+        'CrumbVote einrichten',
+
+    'admin.setupDescription':
+        'Gib den einmaligen Einrichtungscode aus der Serverkonsole ein und wähle anschließend das Administratorpasswort.',
+
+    'admin.setupCode':
+        'Einrichtungscode',
+
+    'admin.password':
+        'Administratorpasswort',
+
+    'admin.showPassword':
+        'Anzeigen',
+
+    'admin.hidePassword':
+        'Ausblenden',
+
+    'admin.passwordMinimum':
+        'Mindestens 12 Zeichen.',
+
+    'admin.confirmPassword':
+        'Passwort bestätigen',
+
+    'admin.configuring':
+        'Wird eingerichtet…',
+
+    'admin.configure':
+        'CrumbVote einrichten',
+
+    'admin.configuredBadge':
+        'CrumbVote ist eingerichtet',
+
+    'admin.welcomeBack':
+        'Willkommen zurück',
+
+    'admin.loginDescription':
+        'Gib das Administratorpasswort ein, um fortzufahren.',
+
+    'admin.signingIn':
+        'Anmeldung…',
+
+    'admin.signIn':
+        'Anmelden',
+
+    'admin.sessionCookie':
+        'Administratorsitzungen werden in einem HttpOnly-Browser-Cookie gespeichert.',
+
+    'admin.errorPasswordMismatch':
+        'Die beiden Passwörter stimmen nicht überein.',
+
+    'admin.errorNetwork':
+        'CrumbVote konnte den Server nicht erreichen. Prüfe, ob das Backend läuft.',
+
+    'admin.errorInvalidSetupCode':
+        'Der Einrichtungscode stimmt nicht mit dem vom CrumbVote-Server ausgegebenen Code überein.',
+
+    'admin.errorPasswordTooShort':
+        'Wähle ein Passwort mit mindestens 12 Zeichen.',
+
+    'admin.errorPasswordTooLong':
+        'Das Passwort ist zu lang.',
+
+    'admin.errorAlreadyConfigured':
+        'CrumbVote wurde bereits eingerichtet.',
+
+    'admin.errorSetupRequired':
+        'CrumbVote muss eingerichtet werden, bevor du dich anmelden kannst.',
+
+    'admin.errorInvalidCredentials':
+        'Das Passwort ist nicht korrekt.',
+
+    'admin.errorDatabase':
+        'CrumbVote konnte nicht auf die Datenbank zugreifen.',
+
+    'admin.errorSetupStateUnavailable':
+        'Der Status der Ersteinrichtung ist nicht verfügbar. Starte CrumbVote neu und versuche es erneut.',
+
+    'admin.errorPasswordHashingFailed':
+        'CrumbVote konnte das Passwort nicht sicher speichern.',
+
+    'admin.errorPasswordVerificationFailed':
+        'CrumbVote konnte das Passwort nicht überprüfen.',
+
+    'admin.errorAuthenticationRequired':
+        'Die Administratorsitzung ist abgelaufen. Melde dich erneut an.',
+
+    'admin.errorTitleRequired':
+        'Gib der Veranstaltung einen Titel.',
+
+    'admin.errorTitleTooLong':
+        'Der Veranstaltungstitel ist zu lang.',
+
+    'admin.errorSlugTooShort':
+        'Die URL-Kennung der Veranstaltung muss mindestens 3 Zeichen enthalten.',
+
+    'admin.errorSlugTooLong':
+        'Die URL-Kennung der Veranstaltung ist zu lang.',
+
+    'admin.errorInvalidSlug':
+        'Die Veranstaltungs-URL darf nur Kleinbuchstaben, Zahlen und einzelne Bindestriche enthalten.',
+
+    'admin.errorDescriptionTooLong':
+        'Die Veranstaltungsbeschreibung ist zu lang.',
+
+    'admin.errorEventSlugTaken':
+        'Diese Veranstaltungs-URL wird bereits verwendet. Wähle eine andere.',
 }
 
 const translations: Record<

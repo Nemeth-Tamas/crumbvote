@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import LanguageSelector from "../components/LanguageSelector.svelte";
     import EventWorkspace from "./EventWorkspace.svelte";
     import {
         ApiError,
@@ -12,6 +13,7 @@
         setupAdmin,
         type CrumbEvent,
     } from "../lib/api";
+    import { locale, translate, type TranslationKey } from "../lib/i18n";
 
     export let initialEventId: number | null = null;
 
@@ -71,7 +73,7 @@
         errorMessage = "";
 
         if (password !== confirmPassword) {
-            errorMessage = "The two passwords do not match.";
+            errorMessage = translate($locale, "admin.errorPasswordMismatch");
             return;
         }
 
@@ -246,67 +248,67 @@
 
     function describeError(error: unknown): string {
         if (!(error instanceof ApiError)) {
-            return "CrumbVote could not reach the server. Check that the backend is running.";
+            return translate($locale, "admin.errorNetwork");
         }
 
-        const messages: Record<string, string> = {
-            invalid_setup_code:
-                "That setup code does not match the code printed by the CrumbVote server.",
+        const messages: Record<string, TranslationKey> = {
+            invalid_setup_code: "admin.errorInvalidSetupCode",
 
-            password_too_short:
-                "Choose a password with at least 12 characters.",
+            password_too_short: "admin.errorPasswordTooShort",
 
-            password_too_long: "That password is too long.",
+            password_too_long: "admin.errorPasswordTooLong",
 
-            already_configured: "CrumbVote has already been configured.",
+            already_configured: "admin.errorAlreadyConfigured",
 
-            setup_required:
-                "CrumbVote still needs to be configured before you can sign in.",
+            setup_required: "admin.errorSetupRequired",
 
-            invalid_credentials: "That password is not correct.",
+            invalid_credentials: "admin.errorInvalidCredentials",
 
-            database_error: "CrumbVote could not access its database.",
+            database_error: "admin.errorDatabase",
 
-            setup_state_unavailable:
-                "The first-run setup state is unavailable. Restart CrumbVote and try again.",
+            setup_state_unavailable: "admin.errorSetupStateUnavailable",
 
-            password_hashing_failed:
-                "CrumbVote could not securely store that password.",
+            password_hashing_failed: "admin.errorPasswordHashingFailed",
 
             password_verification_failed:
-                "CrumbVote could not verify the password.",
+                "admin.errorPasswordVerificationFailed",
 
-            authentication_required:
-                "Your administrator session has expired. Sign in again.",
+            authentication_required: "admin.errorAuthenticationRequired",
 
-            title_required: "Give the event a title.",
+            title_required: "admin.errorTitleRequired",
 
-            title_too_long: "The event title is too long.",
+            title_too_long: "admin.errorTitleTooLong",
 
-            slug_too_short:
-                "The event URL slug must contain at least 3 characters.",
+            slug_too_short: "admin.errorSlugTooShort",
 
-            slug_too_long: "The event URL slug is too long.",
+            slug_too_long: "admin.errorSlugTooLong",
 
-            invalid_slug:
-                "The event URL may only contain lowercase letters, numbers and single hyphens.",
+            invalid_slug: "admin.errorInvalidSlug",
 
-            description_too_long: "The event description is too long.",
+            description_too_long: "admin.errorDescriptionTooLong",
 
-            event_slug_taken:
-                "That event URL is already being used. Choose another slug.",
+            event_slug_taken: "admin.errorEventSlugTaken",
         };
 
-        return (
-            messages[error.code] ??
-            `The request failed with error "${error.code}".`
-        );
+        const key = messages[error.code];
+
+        if (key !== undefined) {
+            return translate($locale, key);
+        }
+
+        return translate($locale, "common.requestFailed", {
+            code: error.code,
+        });
     }
 </script>
 
 <svelte:head>
     <title>Admin · CrumbVote</title>
-    <meta name="description" content="CrumbVote administration console." />
+
+    <meta
+        name="description"
+        content={translate($locale, "admin.metaDescription")}
+    />
 </svelte:head>
 
 <main class="relative min-h-screen overflow-hidden bg-slate-950 text-white">
@@ -335,17 +337,21 @@
                 <div>
                     <div class="leading-none">CrumbVote</div>
                     <div class="mt-1 text-xs font-normal text-slate-500">
-                        Administration
+                        {translate($locale, "admin.administration")}
                     </div>
                 </div>
             </a>
 
-            <a
-                href="/"
-                class="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-400 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
-            >
-                ← Public site
-            </a>
+            <div class="flex items-center gap-2">
+                <LanguageSelector />
+
+                <a
+                    href="/"
+                    class="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-400 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                >
+                    {translate($locale, "admin.publicSite")}
+                </a>
+            </div>
         </header>
 
         {#if view === "dashboard"}
@@ -593,11 +599,14 @@
                                 ></div>
 
                                 <div class="mt-5 font-medium">
-                                    Checking CrumbVote…
+                                    {translate($locale, "admin.loading")}
                                 </div>
 
                                 <div class="mt-2 text-sm text-slate-500">
-                                    Verifying setup and administrator session.
+                                    {translate(
+                                        $locale,
+                                        "admin.loadingDescription",
+                                    )}
                                 </div>
                             </div>
                         {:else if view === "error"}
@@ -609,7 +618,7 @@
                                 </div>
 
                                 <h1 class="mt-5 text-2xl font-semibold">
-                                    Couldn't load the admin console
+                                    {translate($locale, "admin.loadErrorTitle")}
                                 </h1>
 
                                 <p class="mt-3 leading-7 text-slate-400">
@@ -621,7 +630,7 @@
                                     onclick={bootstrap}
                                     class="mt-6 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
                                 >
-                                    Try again
+                                    {translate($locale, "admin.tryAgain")}
                                 </button>
                             </div>
                         {:else if view === "setup"}
@@ -629,19 +638,20 @@
                                 <div
                                     class="mb-5 inline-flex rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1.5 text-xs font-medium text-violet-300"
                                 >
-                                    First-time setup
+                                    {translate($locale, "admin.setupBadge")}
                                 </div>
 
                                 <h1
                                     class="text-3xl font-semibold tracking-tight"
                                 >
-                                    Claim this CrumbVote
+                                    {translate($locale, "admin.setupTitle")}
                                 </h1>
 
                                 <p class="mt-3 leading-7 text-slate-400">
-                                    Enter the one-time setup code printed in the
-                                    server console, then choose the
-                                    administrator password.
+                                    {translate(
+                                        $locale,
+                                        "admin.setupDescription",
+                                    )}
                                 </p>
 
                                 <form
@@ -652,7 +662,10 @@
                                         <span
                                             class="text-sm font-medium text-slate-300"
                                         >
-                                            Setup code
+                                            {translate(
+                                                $locale,
+                                                "admin.setupCode",
+                                            )}
                                         </span>
 
                                         <input
@@ -670,7 +683,10 @@
                                         <span
                                             class="text-sm font-medium text-slate-300"
                                         >
-                                            Administrator password
+                                            {translate(
+                                                $locale,
+                                                "admin.password",
+                                            )}
                                         </span>
 
                                         <div class="relative mt-2">
@@ -692,14 +708,25 @@
                                                         !showPassword)}
                                                 class="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-white/5 hover:text-slate-300"
                                             >
-                                                {showPassword ? "Hide" : "Show"}
+                                                {showPassword
+                                                    ? translate(
+                                                          $locale,
+                                                          "admin.hidePassword",
+                                                      )
+                                                    : translate(
+                                                          $locale,
+                                                          "admin.showPassword",
+                                                      )}
                                             </button>
                                         </div>
 
                                         <span
                                             class="mt-2 block text-xs text-slate-600"
                                         >
-                                            Minimum 12 characters.
+                                            {translate(
+                                                $locale,
+                                                "admin.passwordMinimum",
+                                            )}
                                         </span>
                                     </label>
 
@@ -707,7 +734,10 @@
                                         <span
                                             class="text-sm font-medium text-slate-300"
                                         >
-                                            Confirm password
+                                            {translate(
+                                                $locale,
+                                                "admin.confirmPassword",
+                                            )}
                                         </span>
 
                                         <input
@@ -736,8 +766,14 @@
                                         class="w-full rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3.5 font-semibold text-white shadow-lg shadow-violet-950/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {busy
-                                            ? "Configuring…"
-                                            : "Configure CrumbVote"}
+                                            ? translate(
+                                                  $locale,
+                                                  "admin.configuring",
+                                              )
+                                            : translate(
+                                                  $locale,
+                                                  "admin.configure",
+                                              )}
                                     </button>
                                 </form>
                             </div>
@@ -749,18 +785,23 @@
                                     <span
                                         class="h-1.5 w-1.5 rounded-full bg-emerald-400"
                                     ></span>
-                                    CrumbVote is configured
+                                    {translate(
+                                        $locale,
+                                        "admin.configuredBadge",
+                                    )}
                                 </div>
 
                                 <h1
                                     class="text-3xl font-semibold tracking-tight"
                                 >
-                                    Welcome back
+                                    {translate($locale, "admin.welcomeBack")}
                                 </h1>
 
                                 <p class="mt-3 leading-7 text-slate-400">
-                                    Enter the administrator password to
-                                    continue.
+                                    {translate(
+                                        $locale,
+                                        "admin.loginDescription",
+                                    )}
                                 </p>
 
                                 <form
@@ -810,7 +851,15 @@
                                         disabled={busy}
                                         class="w-full rounded-xl bg-white px-5 py-3.5 font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
-                                        {busy ? "Signing in…" : "Sign in"}
+                                        {busy
+                                            ? translate(
+                                                  $locale,
+                                                  "admin.signingIn",
+                                              )
+                                            : translate(
+                                                  $locale,
+                                                  "admin.signIn",
+                                              )}
                                     </button>
                                 </form>
                             </div>
@@ -820,8 +869,7 @@
                     <p
                         class="mt-5 text-center text-xs leading-5 text-slate-600"
                     >
-                        Administrator sessions are stored in an HttpOnly browser
-                        cookie.
+                        {translate($locale, "admin.sessionCookie")}
                     </p>
                 </div>
             </section>

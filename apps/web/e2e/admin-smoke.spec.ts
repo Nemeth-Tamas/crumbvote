@@ -15,6 +15,13 @@ const PNG_BASE64 =
 test(
     'admin setup and event management happy path',
     async ({ page }) => {
+        await page.addInitScript(() => {
+            window.localStorage.setItem(
+                'crumbvote_locale',
+                'en',
+            )
+        })
+
         await page.goto('/admin')
 
         await expect(
