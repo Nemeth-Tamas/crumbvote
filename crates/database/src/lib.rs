@@ -175,6 +175,43 @@ pub async fn list_events(database: &DatabaseConnection) -> Result<Vec<EventModel
         .await
 }
 
+pub async fn event_by_id(
+    database: &DatabaseConnection,
+    event_id: i32,
+) -> Result<Option<EventModel>, DbErr> {
+    entity::event::Entity::find_by_id(event_id)
+        .one(database)
+        .await
+}
+
+pub async fn update_event(
+    database: &DatabaseConnection,
+    event_id: i32,
+    title: String,
+    description: Option<String>,
+    status: String,
+    results_public: bool,
+) -> Result<Option<EventModel>, DbErr> {
+    let Some(event) = entity::event::Entity::find_by_id(event_id)
+        .one(database)
+        .await?
+    else {
+        return Ok(None);
+    };
+
+    let now = unix_timestamp()?;
+
+    let mut active_event: entity::event::ActiveModel = event.into();
+
+    active_event.title = Set(title);
+    active_event.description = Set(description);
+    active_event.status = Set(status);
+    active_event.results_public = Set(results_public);
+    active_event.updated_at = Set(now);
+
+    Ok(Some(active_event.update(database).await?))
+}
+
 fn unix_timestamp() -> Result<i64, DbErr> {
     let seconds = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -292,5 +329,36 @@ mod tests {
 
         assert_eq!(events.len(), 1);
         assert_eq!(events[0].title, "Cake Beauty 2026");
+
+        let fetched = event_by_id(&database, event.id)
+            .await
+            .expect("event lookup should succeed")
+            .expect("created event should exist");
+
+        assert_eq!(fetched.slug, "cake-beauty-2026");
+
+        let updated = update_event(
+            &database,
+            event.id,
+            "Cake Beauty Championship 2026".to_owned(),
+            Some("Updated cake business.".to_owned()),
+            "open".to_owned(),
+            true,
+        )
+        .await
+        .expect("event update should succeed")
+        .expect("created event should still exist");
+
+        assert_eq!(updated.title, "Cake Beauty Championship 2026");
+        assert_eq!(updated.slug, "cake-beauty-2026");
+        assert_eq!(updated.status, "open");
+        assert!(updated.results_public);
+
+        assert!(
+            event_by_id(&database, 999_999)
+                .await
+                .expect("missing event lookup should succeed")
+                .is_none()
+        );
     }
 }

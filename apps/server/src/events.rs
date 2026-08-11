@@ -2,7 +2,12 @@ use crate::{
     AppState,
     admin::{ApiError, api_error, require_authenticated},
 };
-use axum::{Json, Router, extract::State, http::StatusCode, routing::get};
+use axum::{
+    Json, Router,
+    extract::{Path, State},
+    http::StatusCode,
+    routing::get,
+};
 use axum_extra::extract::cookie::CookieJar;
 use serde::{Deserialize, Serialize};
 
@@ -15,6 +20,14 @@ struct CreateEventRequest {
     title: String,
     slug: String,
     description: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct UpdateEventRequest {
+    title: String,
+    description: Option<String>,
+    status: String,
+    results_public: bool,
 }
 
 #[derive(Serialize)]
@@ -45,7 +58,9 @@ impl From<crumbvote_database::EventModel> for EventResponse {
 }
 
 pub fn router() -> Router<AppState> {
-    Router::new().route("/events", get(list_events).post(create_event))
+    Router::new()
+        .route("/events", get(list_events).post(create_event))
+        .route("/events/{id}", get(get_event).patch(update_event))
 }
 
 async fn list_events(
@@ -63,6 +78,28 @@ async fn list_events(
         })?;
 
     Ok(Json(events.into_iter().map(EventResponse::from).collect()))
+}
+
+async fn get_event(
+    State(state): State<AppState>,
+    jar: CookieJar,
+    Path(event_id): Path<i32>,
+) -> Result<Json<EventResponse>, ApiError> {
+    require_authenticated(&state, &jar).await?;
+
+    let event = crumbvote_database::event_by_id(&state.database, event_id)
+        .await
+        .map_err(|error| {
+            eprintln!("Failed to load event: {error}");
+
+            api_error(StatusCode::INTERNAL_SERVER_ERROR, "database_error")
+        })?;
+
+    let Some(event) = event else {
+        return Err(api_error(StatusCode::NOT_FOUND, "event_not_found"));
+    };
+
+    Ok(Json(EventResponse::from(event)))
 }
 
 async fn create_event(
@@ -83,12 +120,7 @@ async fn create_event(
         .map(|description| description.trim().to_owned())
         .filter(|description| !description.is_empty());
 
-    if description
-        .as_ref()
-        .is_some_and(|description| description.chars().count() > MAX_DESCRIPTION_CHARACTERS)
-    {
-        return Err(api_error(StatusCode::BAD_REQUEST, "description_too_long"));
-    }
+    validate_description(&description)?;
 
     let slug_exists = crumbvote_database::event_slug_exists(&state.database, &slug)
         .await
@@ -111,6 +143,94 @@ async fn create_event(
         })?;
 
     Ok((StatusCode::CREATED, Json(EventResponse::from(event))))
+}
+
+async fn update_event(
+    State(state): State<AppState>,
+    jar: CookieJar,
+    Path(event_id): Path<i32>,
+    Json(request): Json<UpdateEventRequest>,
+) -> Result<Json<EventResponse>, ApiError> {
+    require_authenticated(&state, &jar).await?;
+
+    let title = request.title.trim().to_owned();
+
+    validate_title(&title)?;
+
+    let description = request
+        .description
+        .map(|description| description.trim().to_owned())
+        .filter(|description| !description.is_empty());
+
+    validate_description(&description)?;
+
+    let current = crumbvote_database::event_by_id(&state.database, event_id)
+        .await
+        .map_err(|error| {
+            eprintln!("Failed to load event before update: {error}");
+
+            api_error(StatusCode::INTERNAL_SERVER_ERROR, "database_error")
+        })?;
+
+    let Some(current) = current else {
+        return Err(api_error(StatusCode::NOT_FOUND, "event_not_found"));
+    };
+
+    validate_status_transition(&current.status, &request.status)?;
+
+    let updated = crumbvote_database::update_event(
+        &state.database,
+        event_id,
+        title,
+        description,
+        request.status,
+        request.results_public,
+    )
+    .await
+    .map_err(|error| {
+        eprintln!("Failed to update event: {error}");
+
+        api_error(StatusCode::INTERNAL_SERVER_ERROR, "database_error")
+    })?;
+
+    let Some(updated) = updated else {
+        return Err(api_error(StatusCode::NOT_FOUND, "event_not_found"));
+    };
+
+    Ok(Json(EventResponse::from(updated)))
+}
+
+fn validate_description(description: &Option<String>) -> Result<(), ApiError> {
+    if description
+        .as_ref()
+        .is_some_and(|description| description.chars().count() > MAX_DESCRIPTION_CHARACTERS)
+    {
+        return Err(api_error(StatusCode::BAD_REQUEST, "description_too_long"));
+    }
+
+    Ok(())
+}
+
+fn validate_status_transition(current: &str, requested: &str) -> Result<(), ApiError> {
+    if !matches!(requested, "draft" | "open" | "closed") {
+        return Err(api_error(StatusCode::BAD_REQUEST, "invalid_event_status"));
+    }
+
+    let allowed = matches!(
+        (current, requested),
+        ("draft", "draft")
+            | ("draft", "open")
+            | ("open", "open")
+            | ("open", "closed")
+            | ("closed", "closed")
+            | ("closed", "open")
+    );
+
+    if !allowed {
+        return Err(api_error(StatusCode::CONFLICT, "invalid_status_transition"));
+    }
+
+    Ok(())
 }
 
 fn validate_title(title: &str) -> Result<(), ApiError> {
