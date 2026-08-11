@@ -369,18 +369,20 @@
                                 <span
                                     class="h-1.5 w-1.5 rounded-full bg-emerald-400"
                                 ></span>
-                                Authenticated
+                                {translate($locale, "admin.authenticated")}
                             </div>
 
                             <h1
                                 class="text-3xl font-semibold tracking-tight sm:text-4xl"
                             >
-                                Admin console
+                                {translate($locale, "admin.console")}
                             </h1>
 
                             <p class="mt-3 max-w-2xl leading-7 text-slate-400">
-                                Create and manage voting events, then add the
-                                entries your visitors will vote for.
+                                {translate(
+                                    $locale,
+                                    "admin.dashboardDescription",
+                                )}
                             </p>
                         </div>
 
@@ -390,7 +392,7 @@
                                 onclick={openCreateEvent}
                                 class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-950/30 transition hover:brightness-110"
                             >
-                                + Create event
+                                + {translate($locale, "admin.createEvent")}
                             </button>
 
                             <button
@@ -399,7 +401,9 @@
                                 onclick={handleLogout}
                                 class="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                {busy ? "Signing out…" : "Sign out"}
+                                {busy
+                                    ? translate($locale, "admin.signingOut")
+                                    : translate($locale, "admin.signOut")}
                             </button>
                         </div>
                     </div>
@@ -409,41 +413,47 @@
                     <article
                         class="rounded-3xl border border-white/10 bg-white/[0.035] p-6"
                     >
-                        <div class="text-sm text-slate-500">Events</div>
+                        <div class="text-sm text-slate-500">
+                            {translate($locale, "admin.events")}
+                        </div>
                         <div class="mt-3 text-3xl font-semibold">
                             {events.length}
                         </div>
 
                         <div class="mt-2 text-sm text-slate-400">
-                            Voting events configured in CrumbVote.
+                            {translate($locale, "admin.eventsConfigured")}
                         </div>
                     </article>
 
                     <article
                         class="rounded-3xl border border-white/10 bg-white/[0.035] p-6"
                     >
-                        <div class="text-sm text-slate-500">Votes</div>
+                        <div class="text-sm text-slate-500">
+                            {translate($locale, "admin.votes")}
+                        </div>
                         <div class="mt-3 text-3xl font-semibold">—</div>
                         <div class="mt-2 text-sm text-slate-400">
-                            Waiting for the first event.
+                            {translate($locale, "admin.waitingForFirstEvent")}
                         </div>
                     </article>
 
                     <article
                         class="rounded-3xl border border-white/10 bg-white/[0.035] p-6"
                     >
-                        <div class="text-sm text-slate-500">Admin security</div>
+                        <div class="text-sm text-slate-500">
+                            {translate($locale, "admin.security")}
+                        </div>
 
                         <div
                             class="mt-3 flex items-center gap-2 text-lg font-semibold"
                         >
                             <span class="h-2 w-2 rounded-full bg-emerald-400"
                             ></span>
-                            Active
+                            {translate($locale, "admin.active")}
                         </div>
 
                         <div class="mt-2 text-sm text-slate-400">
-                            Session-backed administrator access is online.
+                            {translate($locale, "admin.securityDescription")}
                         </div>
                     </article>
                 </div>
@@ -460,12 +470,14 @@
                             </div>
 
                             <h2 class="mt-5 text-xl font-semibold">
-                                No events yet
+                                {translate($locale, "admin.noEventsTitle")}
                             </h2>
 
                             <p class="mt-2 leading-7 text-slate-500">
-                                Create your first voting event. Entries, voting
-                                links and results will live inside it.
+                                {translate(
+                                    $locale,
+                                    "admin.noEventsDescription",
+                                )}
                             </p>
 
                             <button
@@ -473,7 +485,7 @@
                                 onclick={openCreateEvent}
                                 class="mt-6 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
                             >
-                                Create first event
+                                {translate($locale, "admin.createFirstEvent")}
                             </button>
                         </div>
                     </div>
@@ -485,10 +497,15 @@
                             class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
                         >
                             <div>
-                                <h2 class="text-xl font-semibold">Events</h2>
+                                <h2 class="text-xl font-semibold">
+                                    {translate($locale, "admin.events")}
+                                </h2>
 
                                 <p class="mt-1 text-sm text-slate-500">
-                                    Your CrumbVote voting events.
+                                    {translate(
+                                        $locale,
+                                        "admin.eventsDescription",
+                                    )}
                                 </p>
                             </div>
 
@@ -497,7 +514,7 @@
                                 onclick={openCreateEvent}
                                 class="w-fit rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
                             >
-                                + New event
+                                + {translate($locale, "admin.newEvent")}
                             </button>
                         </div>
 
@@ -527,19 +544,28 @@
                                             <span
                                                 class="shrink-0 rounded-full border border-emerald-400/15 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300"
                                             >
-                                                Open
+                                                {translate(
+                                                    $locale,
+                                                    "admin.statusOpen",
+                                                )}
                                             </span>
                                         {:else if event.status === "closed"}
                                             <span
                                                 class="shrink-0 rounded-full border border-slate-400/15 bg-slate-400/10 px-3 py-1 text-xs font-medium text-slate-300"
                                             >
-                                                Closed
+                                                {translate(
+                                                    $locale,
+                                                    "admin.statusClosed",
+                                                )}
                                             </span>
                                         {:else}
                                             <span
                                                 class="shrink-0 rounded-full border border-violet-400/15 bg-violet-400/10 px-3 py-1 text-xs font-medium text-violet-300"
                                             >
-                                                Draft
+                                                {translate(
+                                                    $locale,
+                                                    "admin.statusDraft",
+                                                )}
                                             </span>
                                         {/if}
                                     </div>
@@ -548,24 +574,45 @@
                                         class="mt-4 min-h-12 text-sm leading-6 text-slate-400"
                                     >
                                         {event.description ??
-                                            "No description yet."}
+                                            translate(
+                                                $locale,
+                                                "admin.noDescription",
+                                            )}
                                     </p>
 
                                     <div
                                         class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/5 pt-4 text-xs text-slate-600"
                                     >
                                         <span>
-                                            Created
+                                            {translate(
+                                                $locale,
+                                                "admin.created",
+                                            )}
                                             {new Date(
                                                 event.created_at * 1000,
-                                            ).toLocaleString()}
+                                            ).toLocaleString(
+                                                $locale === "hu"
+                                                    ? "hu-HU"
+                                                    : $locale === "de"
+                                                      ? "de-DE"
+                                                      : "en-US",
+                                            )}
                                         </span>
 
                                         <span>
-                                            Results:
+                                            {translate(
+                                                $locale,
+                                                "admin.results",
+                                            )}
                                             {event.results_public
-                                                ? "public"
-                                                : "private"}
+                                                ? translate(
+                                                      $locale,
+                                                      "admin.public",
+                                                  )
+                                                : translate(
+                                                      $locale,
+                                                      "admin.private",
+                                                  )}
                                         </span>
                                     </div>
 
@@ -573,7 +620,10 @@
                                         href={`/admin/events/${event.id}`}
                                         class="mt-5 block w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-center text-sm font-medium text-slate-300 transition hover:border-violet-400/30 hover:bg-violet-400/10 hover:text-white"
                                     >
-                                        Manage event →
+                                        {translate(
+                                            $locale,
+                                            "admin.manageEvent",
+                                        )}
                                     </a>
                                 </article>
                             {/each}
@@ -812,7 +862,10 @@
                                         <span
                                             class="text-sm font-medium text-slate-300"
                                         >
-                                            Administrator password
+                                            {translate(
+                                                $locale,
+                                                "admin.password",
+                                            )}
                                         </span>
 
                                         <div class="relative mt-2">
@@ -833,7 +886,15 @@
                                                         !showPassword)}
                                                 class="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-white/5 hover:text-slate-300"
                                             >
-                                                {showPassword ? "Hide" : "Show"}
+                                                {showPassword
+                                                    ? translate(
+                                                          $locale,
+                                                          "admin.hidePassword",
+                                                      )
+                                                    : translate(
+                                                          $locale,
+                                                          "admin.showPassword",
+                                                      )}
                                             </button>
                                         </div>
                                     </label>

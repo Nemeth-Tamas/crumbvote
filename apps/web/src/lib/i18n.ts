@@ -388,6 +388,87 @@ const hu = {
 
     'admin.errorEventSlugTaken':
         'Ez az esemény-URL már használatban van. Válassz másikat.',
+
+    'admin.authenticated':
+        'Bejelentkezve',
+
+    'admin.console':
+        'Adminfelület',
+
+    'admin.dashboardDescription':
+        'Hozz létre és kezelj szavazási eseményeket, majd add hozzá a nevezéseket, amelyekre a látogatók szavazhatnak.',
+
+    'admin.createEvent':
+        'Esemény létrehozása',
+
+    'admin.signingOut':
+        'Kijelentkezés…',
+
+    'admin.signOut':
+        'Kijelentkezés',
+
+    'admin.events':
+        'Események',
+
+    'admin.eventsConfigured':
+        'A CrumbVote-ban beállított szavazási események.',
+
+    'admin.votes':
+        'Szavazatok',
+
+    'admin.waitingForFirstEvent':
+        'Az első eseményre vár.',
+
+    'admin.security':
+        'Adminbiztonság',
+
+    'admin.active':
+        'Aktív',
+
+    'admin.securityDescription':
+        'A munkamenet-alapú adminisztrátori hozzáférés működik.',
+
+    'admin.noEventsTitle':
+        'Még nincsenek események',
+
+    'admin.noEventsDescription':
+        'Hozd létre az első szavazási eseményedet. A nevezések, szavazási linkek és eredmények ezen belül lesznek.',
+
+    'admin.createFirstEvent':
+        'Első esemény létrehozása',
+
+    'admin.eventsDescription':
+        'CrumbVote szavazási eseményeid.',
+
+    'admin.newEvent':
+        'Új esemény',
+
+    'admin.statusOpen':
+        'Nyitva',
+
+    'admin.statusClosed':
+        'Lezárva',
+
+    'admin.statusDraft':
+        'Piszkozat',
+
+    'admin.noDescription':
+        'Még nincs leírás.',
+
+    'admin.created':
+        'Létrehozva',
+
+    'admin.results':
+        'Eredmények:',
+
+    'admin.public':
+        'nyilvános',
+
+    'admin.private':
+        'privát',
+
+    'admin.manageEvent':
+        'Esemény kezelése →',
 } as const
 
 export type TranslationKey =
@@ -769,6 +850,87 @@ const en: Record<
 
     'admin.errorEventSlugTaken':
         'That event URL is already being used. Choose another slug.',
+
+    'admin.authenticated':
+        'Authenticated',
+
+    'admin.console':
+        'Admin console',
+
+    'admin.dashboardDescription':
+        'Create and manage voting events, then add the entries your visitors will vote for.',
+
+    'admin.createEvent':
+        'Create event',
+
+    'admin.signingOut':
+        'Signing out…',
+
+    'admin.signOut':
+        'Sign out',
+
+    'admin.events':
+        'Events',
+
+    'admin.eventsConfigured':
+        'Voting events configured in CrumbVote.',
+
+    'admin.votes':
+        'Votes',
+
+    'admin.waitingForFirstEvent':
+        'Waiting for the first event.',
+
+    'admin.security':
+        'Admin security',
+
+    'admin.active':
+        'Active',
+
+    'admin.securityDescription':
+        'Session-backed administrator access is online.',
+
+    'admin.noEventsTitle':
+        'No events yet',
+
+    'admin.noEventsDescription':
+        'Create your first voting event. Entries, voting links and results will live inside it.',
+
+    'admin.createFirstEvent':
+        'Create first event',
+
+    'admin.eventsDescription':
+        'Your CrumbVote voting events.',
+
+    'admin.newEvent':
+        'New event',
+
+    'admin.statusOpen':
+        'Open',
+
+    'admin.statusClosed':
+        'Closed',
+
+    'admin.statusDraft':
+        'Draft',
+
+    'admin.noDescription':
+        'No description yet.',
+
+    'admin.created':
+        'Created',
+
+    'admin.results':
+        'Results:',
+
+    'admin.public':
+        'public',
+
+    'admin.private':
+        'private',
+
+    'admin.manageEvent':
+        'Manage event →',
 }
 
 const de: Record<
@@ -1147,6 +1309,87 @@ const de: Record<
 
     'admin.errorEventSlugTaken':
         'Diese Veranstaltungs-URL wird bereits verwendet. Wähle eine andere.',
+
+    'admin.authenticated':
+        'Angemeldet',
+
+    'admin.console':
+        'Adminbereich',
+
+    'admin.dashboardDescription':
+        'Erstelle und verwalte Abstimmungen und füge anschließend die Beiträge hinzu, für die Besucher abstimmen können.',
+
+    'admin.createEvent':
+        'Veranstaltung erstellen',
+
+    'admin.signingOut':
+        'Abmeldung…',
+
+    'admin.signOut':
+        'Abmelden',
+
+    'admin.events':
+        'Veranstaltungen',
+
+    'admin.eventsConfigured':
+        'In CrumbVote eingerichtete Abstimmungen.',
+
+    'admin.votes':
+        'Stimmen',
+
+    'admin.waitingForFirstEvent':
+        'Wartet auf die erste Veranstaltung.',
+
+    'admin.security':
+        'Admin-Sicherheit',
+
+    'admin.active':
+        'Aktiv',
+
+    'admin.securityDescription':
+        'Der sitzungsbasierte Administratorzugriff ist aktiv.',
+
+    'admin.noEventsTitle':
+        'Noch keine Veranstaltungen',
+
+    'admin.noEventsDescription':
+        'Erstelle deine erste Abstimmung. Beiträge, Abstimmungslinks und Ergebnisse befinden sich anschließend darin.',
+
+    'admin.createFirstEvent':
+        'Erste Veranstaltung erstellen',
+
+    'admin.eventsDescription':
+        'Deine CrumbVote-Abstimmungen.',
+
+    'admin.newEvent':
+        'Neue Veranstaltung',
+
+    'admin.statusOpen':
+        'Geöffnet',
+
+    'admin.statusClosed':
+        'Geschlossen',
+
+    'admin.statusDraft':
+        'Entwurf',
+
+    'admin.noDescription':
+        'Noch keine Beschreibung.',
+
+    'admin.created':
+        'Erstellt',
+
+    'admin.results':
+        'Ergebnisse:',
+
+    'admin.public':
+        'öffentlich',
+
+    'admin.private':
+        'privat',
+
+    'admin.manageEvent':
+        'Veranstaltung verwalten →',
 }
 
 const translations: Record<
