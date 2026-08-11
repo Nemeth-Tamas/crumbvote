@@ -42,11 +42,11 @@ struct SessionResponse {
 }
 
 #[derive(Serialize)]
-struct ErrorResponse {
+pub(crate) struct ErrorResponse {
     error: &'static str,
 }
 
-type ApiError = (StatusCode, Json<ErrorResponse>);
+pub(crate) type ApiError = (StatusCode, Json<ErrorResponse>);
 
 pub fn router() -> Router<AppState> {
     Router::new()
@@ -318,6 +318,40 @@ fn remove_session_cookie(jar: CookieJar) -> CookieJar {
     jar.remove(Cookie::build(ADMIN_SESSION_COOKIE).path("/").build())
 }
 
+pub(crate) async fn require_authenticated(
+    state: &AppState,
+    jar: &CookieJar,
+) -> Result<(), ApiError> {
+    let Some(session_token) = jar
+        .get(ADMIN_SESSION_COOKIE)
+        .map(|cookie| cookie.value().to_owned())
+    else {
+        return Err(api_error(
+            StatusCode::UNAUTHORIZED,
+            "authentication_required",
+        ));
+    };
+
+    let token_hash = auth::hash_session_token(&session_token);
+
+    let valid = crumbvote_database::admin_session_is_valid(&state.database, &token_hash)
+        .await
+        .map_err(|error| {
+            eprintln!("Failed to validate admin session: {error}");
+
+            api_error(StatusCode::INTERNAL_SERVER_ERROR, "database_error")
+        })?;
+
+    if !valid {
+        return Err(api_error(
+            StatusCode::UNAUTHORIZED,
+            "authentication_required",
+        ));
+    }
+
+    Ok(())
+}
+
 fn validate_password(password: &str) -> Result<(), ApiError> {
     if password.chars().count() < MIN_PASSWORD_CHARACTERS {
         return Err(api_error(StatusCode::BAD_REQUEST, "password_too_short"));
@@ -330,6 +364,6 @@ fn validate_password(password: &str) -> Result<(), ApiError> {
     Ok(())
 }
 
-fn api_error(status: StatusCode, error: &'static str) -> ApiError {
+pub(crate) fn api_error(status: StatusCode, error: &'static str) -> ApiError {
     (status, Json(ErrorResponse { error }))
 }

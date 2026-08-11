@@ -1,7 +1,10 @@
 pub mod entity;
 mod migration;
 
-use sea_orm::{ActiveModelTrait, ConnectOptions, Database, DbErr, EntityTrait, Set};
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, ConnectOptions, Database, DbErr, EntityTrait, NotSet,
+    QueryFilter, QueryOrder, Set,
+};
 use sea_orm_migration::MigratorTrait;
 use std::time::Duration;
 
@@ -133,6 +136,45 @@ pub async fn delete_admin_session(
     Ok(())
 }
 
+pub use entity::event::Model as EventModel;
+
+pub async fn event_slug_exists(database: &DatabaseConnection, slug: &str) -> Result<bool, DbErr> {
+    Ok(entity::event::Entity::find()
+        .filter(entity::event::Column::Slug.eq(slug))
+        .one(database)
+        .await?
+        .is_some())
+}
+
+pub async fn create_event(
+    database: &DatabaseConnection,
+    slug: String,
+    title: String,
+    description: Option<String>,
+) -> Result<EventModel, DbErr> {
+    let now = unix_timestamp()?;
+
+    entity::event::ActiveModel {
+        id: NotSet,
+        slug: Set(slug),
+        title: Set(title),
+        description: Set(description),
+        status: Set("draft".to_owned()),
+        results_public: Set(false),
+        created_at: Set(now),
+        updated_at: Set(now),
+    }
+    .insert(database)
+    .await
+}
+
+pub async fn list_events(database: &DatabaseConnection) -> Result<Vec<EventModel>, DbErr> {
+    entity::event::Entity::find()
+        .order_by_desc(entity::event::Column::CreatedAt)
+        .all(database)
+        .await
+}
+
 fn unix_timestamp() -> Result<i64, DbErr> {
     let seconds = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -168,6 +210,13 @@ mod tests {
                 .has_table("admin_sessions")
                 .await
                 .expect("admin_sessions schema check should succeed")
+        );
+
+        assert!(
+            schema
+                .has_table("events")
+                .await
+                .expect("events schema check should succeed")
         );
 
         assert!(
@@ -213,5 +262,35 @@ mod tests {
                 .await
                 .expect("deleted admin session should be invalid")
         );
+
+        assert!(
+            !event_slug_exists(&database, "cake-beauty-2026",)
+                .await
+                .expect("event slug lookup should succeed")
+        );
+
+        let event = create_event(
+            &database,
+            "cake-beauty-2026".to_owned(),
+            "Cake Beauty 2026".to_owned(),
+            Some("Very serious cake business.".to_owned()),
+        )
+        .await
+        .expect("event should be created");
+
+        assert_eq!(event.slug, "cake-beauty-2026");
+        assert_eq!(event.status, "draft");
+        assert!(!event.results_public);
+
+        assert!(
+            event_slug_exists(&database, "cake-beauty-2026",)
+                .await
+                .expect("event slug lookup should succeed")
+        );
+
+        let events = list_events(&database).await.expect("events should list");
+
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].title, "Cake Beauty 2026");
     }
 }

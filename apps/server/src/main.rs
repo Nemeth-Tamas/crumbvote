@@ -1,5 +1,6 @@
 mod admin;
 mod auth;
+mod events;
 
 use axum::{Json, Router, extract::State, http::StatusCode, routing::get};
 use crumbvote_database::DatabaseConnection;
@@ -67,9 +68,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         secure_cookies,
     };
 
+    let admin_api = admin::router().merge(events::router());
+
     let app = Router::new()
         .route("/health", get(health))
-        .nest("/api/admin", admin::router())
+        .nest("/api/admin", admin_api)
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(LISTEN_ADDRESS).await?;
