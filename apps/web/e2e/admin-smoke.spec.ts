@@ -355,6 +355,43 @@ test(
             ),
         ).toBeVisible()
 
+        await page.goto(
+            '/e/e2e-cake-show/1',
+        )
+
+        await expect(
+            page.getByRole(
+                'heading',
+                {
+                    name:
+                        'E2E Raspberry Cake Deluxe',
+                },
+            ),
+        ).toBeVisible()
+
+        await expect(
+            page.getByText(
+                'Voting is open',
+            ).first(),
+        ).toBeVisible()
+
+        await expect(
+            page.getByAltText(
+                'E2E Raspberry Cake Deluxe',
+            ),
+        ).toBeVisible()
+
+        await page.goto('/admin')
+
+        await expect(
+            page.getByRole(
+                'heading',
+                {
+                    name: 'Welcome back',
+                },
+            ),
+        ).toBeVisible()
+
         await page
             .getByLabel(
                 'Administrator password',

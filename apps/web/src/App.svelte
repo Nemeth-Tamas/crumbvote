@@ -1,6 +1,7 @@
 <script lang="ts">
   import AdminPage from "./pages/AdminPage.svelte";
   import LandingPage from "./pages/LandingPage.svelte";
+  import PublicEntryPage from "./pages/PublicEntryPage.svelte";
 
   const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
 
@@ -9,11 +10,20 @@
   const adminEventId =
     adminEventMatch !== null ? Number.parseInt(adminEventMatch[1], 10) : null;
 
+  const publicEntryMatch = pathname.match(/^\/e\/([a-z0-9-]+)\/(\d+)$/);
+
+  const publicEventSlug = publicEntryMatch?.[1] ?? null;
+
+  const publicEntryId =
+    publicEntryMatch !== null ? Number.parseInt(publicEntryMatch[2], 10) : null;
+
   const isAdminRoute = pathname === "/admin" || adminEventId !== null;
 </script>
 
 {#if isAdminRoute}
   <AdminPage initialEventId={adminEventId} />
+{:else if publicEventSlug !== null && publicEntryId !== null}
+  <PublicEntryPage eventSlug={publicEventSlug} entryId={publicEntryId} />
 {:else}
   <LandingPage />
 {/if}

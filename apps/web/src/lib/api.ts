@@ -60,6 +60,27 @@ export type UpdateEntryInput = {
     description: string | null
 }
 
+export type PublicEvent = {
+    slug: string
+    title: string
+    description: string | null
+    status: EventStatus
+    results_public: boolean
+}
+
+export type PublicEntry = {
+    id: number
+    number: number
+    name: string
+    description: string | null
+    image_url: string | null
+}
+
+export type PublicEntryPayload = {
+    event: PublicEvent
+    entry: PublicEntry
+}
+
 export class ApiError extends Error {
     constructor(
         public readonly status: number,
@@ -239,5 +260,14 @@ export function uploadAdminEntryImage(
             method: 'POST',
             body: formData,
         },
+    )
+}
+
+export function getPublicEntry(
+    eventSlug: string,
+    entryId: number,
+): Promise<PublicEntryPayload> {
+    return request<PublicEntryPayload>(
+        `/api/public/events/${eventSlug}/entries/${entryId}`,
     )
 }

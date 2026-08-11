@@ -2,6 +2,7 @@ mod admin;
 mod auth;
 mod entries;
 mod events;
+mod public_api;
 
 use axum::{Json, Router, extract::State, http::StatusCode, routing::get};
 use crumbvote_database::DatabaseConnection;
@@ -95,6 +96,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let app = Router::new()
         .route("/health", get(health))
         .nest("/api/admin", admin_api)
+        .nest("/api/public", public_api::router())
         .nest_service("/media/entries", ServeDir::new(ENTRY_IMAGE_DIRECTORY))
         .with_state(state);
 

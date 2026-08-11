@@ -184,6 +184,16 @@ pub async fn event_by_id(
         .await
 }
 
+pub async fn event_by_slug(
+    database: &DatabaseConnection,
+    slug: &str,
+) -> Result<Option<EventModel>, DbErr> {
+    entity::event::Entity::find()
+        .filter(entity::event::Column::Slug.eq(slug))
+        .one(database)
+        .await
+}
+
 pub async fn update_event(
     database: &DatabaseConnection,
     event_id: i32,
@@ -429,6 +439,13 @@ mod tests {
         assert_eq!(event.slug, "cake-beauty-2026");
         assert_eq!(event.status, "draft");
         assert!(!event.results_public);
+
+        let fetched_by_slug = event_by_slug(&database, "cake-beauty-2026")
+            .await
+            .expect("event slug lookup should succeed")
+            .expect("created event should exist");
+
+        assert_eq!(fetched_by_slug.id, event.id);
 
         assert!(
             event_slug_exists(&database, "cake-beauty-2026",)
