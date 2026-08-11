@@ -10,12 +10,15 @@ use std::{
     error::Error,
     sync::{Arc, Mutex},
 };
+use tower_http::services::ServeDir;
 
 const LISTEN_ADDRESS: &str = "0.0.0.0:3000";
 
 const DEFAULT_DATABASE_URL: &str = "sqlite://data/crumbvote.sqlite?mode=rwc";
 
 const DATA_DIRECTORY: &str = "data";
+
+pub(crate) const ENTRY_IMAGE_DIRECTORY: &str = "data/uploads/entries";
 
 #[derive(Clone)]
 pub(crate) struct AppState {
@@ -34,6 +37,7 @@ struct HealthResponse {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     std::fs::create_dir_all(DATA_DIRECTORY)?;
+    std::fs::create_dir_all(ENTRY_IMAGE_DIRECTORY)?;
 
     let database_url =
         std::env::var("CRUMBVOTE_DATABASE_URL").unwrap_or_else(|_| DEFAULT_DATABASE_URL.to_owned());
@@ -76,6 +80,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let app = Router::new()
         .route("/health", get(health))
         .nest("/api/admin", admin_api)
+        .nest_service("/media/entries", ServeDir::new(ENTRY_IMAGE_DIRECTORY))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(LISTEN_ADDRESS).await?;

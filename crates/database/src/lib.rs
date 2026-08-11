@@ -253,11 +253,67 @@ pub async fn create_entry(
         number: Set(number),
         name: Set(name),
         description: Set(description),
+        image_filename: Set(None),
         created_at: Set(now),
         updated_at: Set(now),
     }
     .insert(database)
     .await
+}
+
+pub async fn entry_by_id(
+    database: &DatabaseConnection,
+    entry_id: i32,
+) -> Result<Option<EntryModel>, DbErr> {
+    entity::entry::Entity::find_by_id(entry_id)
+        .one(database)
+        .await
+}
+
+pub async fn update_entry(
+    database: &DatabaseConnection,
+    entry_id: i32,
+    name: String,
+    description: Option<String>,
+) -> Result<Option<EntryModel>, DbErr> {
+    let Some(entry) = entity::entry::Entity::find_by_id(entry_id)
+        .one(database)
+        .await?
+    else {
+        return Ok(None);
+    };
+
+    let now = unix_timestamp()?;
+
+    let mut active_entry: entity::entry::ActiveModel = entry.into();
+
+    active_entry.name = Set(name);
+    active_entry.description = Set(description);
+    active_entry.updated_at = Set(now);
+
+    Ok(Some(active_entry.update(database).await?))
+}
+
+pub async fn set_entry_image_filename(
+    database: &DatabaseConnection,
+    entry_id: i32,
+    image_filename: Option<String>,
+) -> Result<Option<EntryModel>, DbErr> {
+    let Some(entry) = entity::entry::Entity::find_by_id(entry_id)
+        .one(database)
+        .await?
+    else {
+        return Ok(None);
+    };
+
+    let now = unix_timestamp()?;
+
+    let mut active_entry: entity::entry::ActiveModel = entry.into();
+
+    active_entry.image_filename = Set(image_filename);
+    active_entry.updated_at = Set(now);
+
+    Ok(Some(active_entry.update(database).await?))
 }
 
 fn unix_timestamp() -> Result<i64, DbErr> {
@@ -403,6 +459,7 @@ mod tests {
 
         assert_eq!(first_entry.event_id, event.id);
         assert_eq!(first_entry.number, 1);
+        assert!(first_entry.image_filename.is_none());
 
         let second_entry = create_entry(&database, event.id, "Chocolate Cake".to_owned(), None)
             .await
@@ -419,6 +476,29 @@ mod tests {
         assert_eq!(entries[0].name, "Strawberry Cake");
         assert_eq!(entries[1].number, 2);
         assert_eq!(entries[1].name, "Chocolate Cake");
+
+        let edited_entry = update_entry(
+            &database,
+            first_entry.id,
+            "Strawberry Masterpiece".to_owned(),
+            Some("Updated description.".to_owned()),
+        )
+        .await
+        .expect("entry update should succeed")
+        .expect("entry should exist");
+
+        assert_eq!(edited_entry.name, "Strawberry Masterpiece");
+
+        let imaged_entry =
+            set_entry_image_filename(&database, first_entry.id, Some("test-image.jpg".to_owned()))
+                .await
+                .expect("entry image update should succeed")
+                .expect("entry should exist");
+
+        assert_eq!(
+            imaged_entry.image_filename.as_deref(),
+            Some("test-image.jpg")
+        );
 
         let updated = update_event(
             &database,
