@@ -1,26 +1,30 @@
 <script lang="ts">
+    import LanguageSelector from "../components/LanguageSelector.svelte";
+    import { locale, translate } from "../lib/i18n";
+
     const features = [
         {
-            title: "Vote",
-            description:
-                "Fast, mobile-first voting from individual entry links.",
+            title: "landing.featureVoteTitle",
+            description: "landing.featureVoteDescription",
         },
         {
-            title: "Manage",
-            description:
-                "Create events and manage entries from the admin dashboard.",
+            title: "landing.featureManageTitle",
+            description: "landing.featureManageDescription",
         },
         {
-            title: "Analyse",
-            description:
-                "Watch turnout, results and suspicious activity in real time.",
+            title: "landing.featureAnalyseTitle",
+            description: "landing.featureAnalyseDescription",
         },
-    ];
+    ] as const;
 </script>
 
 <svelte:head>
     <title>CrumbVote</title>
-    <meta name="description" content="Simple, beautiful event voting." />
+
+    <meta
+        name="description"
+        content={translate($locale, "landing.metaDescription")}
+    />
 </svelte:head>
 
 <main class="relative min-h-screen overflow-hidden bg-slate-950 text-white">
@@ -33,7 +37,7 @@
     ></div>
 
     <div class="relative mx-auto max-w-6xl px-6 py-8 sm:px-10 lg:px-16">
-        <nav class="flex items-center justify-between">
+        <nav class="flex items-center justify-between gap-4">
             <a
                 href="/"
                 class="flex items-center gap-3 font-semibold tracking-tight"
@@ -47,12 +51,16 @@
                 <span>CrumbVote</span>
             </a>
 
-            <a
-                href="/admin"
-                class="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
-            >
-                Admin
-            </a>
+            <div class="flex items-center gap-2">
+                <LanguageSelector />
+
+                <a
+                    href="/admin"
+                    class="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                >
+                    {translate($locale, "landing.admin")}
+                </a>
+            </div>
         </nav>
 
         <div
@@ -62,26 +70,27 @@
                 class="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 backdrop-blur"
             >
                 <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                Simple event voting
+
+                {translate($locale, "landing.badge")}
             </div>
 
             <div class="max-w-3xl">
                 <h1
                     class="text-5xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl"
                 >
-                    Voting without
+                    {translate($locale, "landing.heroPrefix")}
+
                     <span
                         class="bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent"
                     >
-                        the nonsense.
+                        {translate($locale, "landing.heroAccent")}
                     </span>
                 </h1>
 
                 <p
                     class="mt-6 max-w-2xl text-lg leading-8 text-slate-400 sm:text-xl"
                 >
-                    Simple event voting, beautiful participant pages and useful
-                    analytics without forcing visitors to install an app.
+                    {translate($locale, "landing.description")}
                 </p>
             </div>
 
@@ -91,11 +100,11 @@
                         class="rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur transition hover:-translate-y-1 hover:border-white/15 hover:bg-white/[0.06]"
                     >
                         <h2 class="text-xl font-semibold">
-                            {feature.title}
+                            {translate($locale, feature.title)}
                         </h2>
 
                         <p class="mt-2 leading-7 text-slate-400">
-                            {feature.description}
+                            {translate($locale, feature.description)}
                         </p>
                     </article>
                 {/each}
@@ -104,7 +113,10 @@
             <div class="mt-12 flex items-center gap-3 text-sm text-slate-500">
                 <span>CrumbVote</span>
                 <span>•</span>
-                <span>Development build</span>
+
+                <span>
+                    {translate($locale, "landing.developmentBuild")}
+                </span>
             </div>
         </div>
     </div>
