@@ -398,6 +398,27 @@ pub async fn record_activity(
     .await
 }
 
+pub async fn list_votes(
+    database: &DatabaseConnection,
+    event_id: i32,
+) -> Result<Vec<VoteModel>, DbErr> {
+    entity::vote::Entity::find()
+        .filter(entity::vote::Column::EventId.eq(event_id))
+        .all(database)
+        .await
+}
+
+pub async fn list_activity_events(
+    database: &DatabaseConnection,
+    event_id: i32,
+) -> Result<Vec<ActivityEventModel>, DbErr> {
+    entity::activity_event::Entity::find()
+        .filter(entity::activity_event::Column::EventId.eq(event_id))
+        .order_by_asc(entity::activity_event::Column::CreatedAt)
+        .all(database)
+        .await
+}
+
 fn unix_timestamp() -> Result<i64, DbErr> {
     let seconds = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -670,6 +691,22 @@ mod tests {
         .expect("vote change activity should record");
 
         assert_eq!(change_activity.kind, "vote_change");
+
+        let event_votes = list_votes(&database, event.id)
+            .await
+            .expect("event votes should list");
+
+        assert_eq!(event_votes.len(), 1);
+        assert_eq!(event_votes[0].entry_id, second_entry.id);
+
+        let activity_events = list_activity_events(&database, event.id)
+            .await
+            .expect("activity events should list");
+
+        assert_eq!(activity_events.len(), 3);
+        assert_eq!(activity_events[0].kind, "scan");
+        assert_eq!(activity_events[1].kind, "vote");
+        assert_eq!(activity_events[2].kind, "vote_change");
 
         let updated = update_event(
             &database,

@@ -4,10 +4,12 @@
         ApiError,
         createAdminEntry,
         getAdminEvent,
+        getAdminEventAnalytics,
         listAdminEntries,
         updateAdminEntry,
         updateAdminEvent,
         uploadAdminEntryImage,
+        type AdminEventAnalytics,
         type CrumbEntry,
         type CrumbEvent,
         type EventStatus,
@@ -29,6 +31,7 @@
     let successMessage = "";
 
     let entries: CrumbEntry[] = [];
+    let analytics: AdminEventAnalytics | null = null;
 
     let createEntryOpen = false;
     let entryName = "";
@@ -56,13 +59,16 @@
         errorMessage = "";
 
         try {
-            const [loadedEvent, loadedEntries] = await Promise.all([
-                getAdminEvent(eventId),
-                listAdminEntries(eventId),
-            ]);
+            const [loadedEvent, loadedEntries, loadedAnalytics] =
+                await Promise.all([
+                    getAdminEvent(eventId),
+                    listAdminEntries(eventId),
+                    getAdminEventAnalytics(eventId),
+                ]);
 
             applyEvent(loadedEvent);
             entries = loadedEntries;
+            analytics = loadedAnalytics;
         } catch (error) {
             handleError(error);
         } finally {
@@ -386,6 +392,17 @@
                 return "Closed";
         }
     }
+
+    function conversionRate(): string {
+        if (analytics === null || analytics.unique_visitors === 0) {
+            return "0%";
+        }
+
+        const percentage =
+            (analytics.current_votes / analytics.unique_visitors) * 100;
+
+        return `${Math.round(percentage)}%`;
+    }
 </script>
 
 {#if loading}
@@ -530,6 +547,92 @@
                 </div>
             </div>
         </div>
+
+        {#if analytics !== null}
+            <section class="mt-6">
+                <div class="mb-4 flex items-end justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-semibold">Analytics</h2>
+
+                        <p class="mt-1 text-sm text-slate-500">
+                            Live activity collected for this event.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                    <article
+                        class="rounded-2xl border border-white/10 bg-white/[0.025] p-5"
+                    >
+                        <div
+                            class="text-xs font-medium uppercase tracking-wider text-slate-600"
+                        >
+                            Scans / opens
+                        </div>
+
+                        <div class="mt-3 text-3xl font-semibold">
+                            {analytics.total_scans}
+                        </div>
+                    </article>
+
+                    <article
+                        class="rounded-2xl border border-white/10 bg-white/[0.025] p-5"
+                    >
+                        <div
+                            class="text-xs font-medium uppercase tracking-wider text-slate-600"
+                        >
+                            Unique visitors
+                        </div>
+
+                        <div class="mt-3 text-3xl font-semibold">
+                            {analytics.unique_visitors}
+                        </div>
+                    </article>
+
+                    <article
+                        class="rounded-2xl border border-white/10 bg-white/[0.025] p-5"
+                    >
+                        <div
+                            class="text-xs font-medium uppercase tracking-wider text-slate-600"
+                        >
+                            Current votes
+                        </div>
+
+                        <div class="mt-3 text-3xl font-semibold">
+                            {analytics.current_votes}
+                        </div>
+                    </article>
+
+                    <article
+                        class="rounded-2xl border border-white/10 bg-white/[0.025] p-5"
+                    >
+                        <div
+                            class="text-xs font-medium uppercase tracking-wider text-slate-600"
+                        >
+                            Conversion
+                        </div>
+
+                        <div class="mt-3 text-3xl font-semibold">
+                            {conversionRate()}
+                        </div>
+                    </article>
+
+                    <article
+                        class="rounded-2xl border border-white/10 bg-white/[0.025] p-5"
+                    >
+                        <div
+                            class="text-xs font-medium uppercase tracking-wider text-slate-600"
+                        >
+                            Vote changes
+                        </div>
+
+                        <div class="mt-3 text-3xl font-semibold">
+                            {analytics.vote_changes}
+                        </div>
+                    </article>
+                </div>
+            </section>
+        {/if}
 
         <div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
             <form

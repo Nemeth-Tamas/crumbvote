@@ -566,5 +566,76 @@ test(
                 },
             ),
         ).toBeVisible()
+
+        const analyticsEventCard =
+            page
+                .getByRole('article')
+                .filter({
+                    hasText: 'E2E Cake Show',
+                })
+
+        await analyticsEventCard
+            .getByRole(
+                'link',
+                {
+                    name: /Manage event/,
+                },
+            )
+            .click()
+
+        const scansCard =
+            page
+                .getByRole('article')
+                .filter({
+                    hasText: 'Scans / opens',
+                })
+
+        await expect(
+            scansCard,
+        ).toContainText('5')
+
+        const visitorsCard =
+            page
+                .getByRole('article')
+                .filter({
+                    hasText: 'Unique visitors',
+                })
+
+        await expect(
+            visitorsCard,
+        ).toContainText('1')
+
+        const votesCard =
+            page
+                .getByRole('article')
+                .filter({
+                    hasText: 'Current votes',
+                })
+
+        await expect(
+            votesCard,
+        ).toContainText('1')
+
+        const conversionCard =
+            page
+                .getByRole('article')
+                .filter({
+                    hasText: 'Conversion',
+                })
+
+        await expect(
+            conversionCard,
+        ).toContainText('100%')
+
+        const changesCard =
+            page
+                .getByRole('article')
+                .filter({
+                    hasText: 'Vote changes',
+                })
+
+        await expect(
+            changesCard,
+        ).toContainText('1')
     },
 )

@@ -93,6 +93,21 @@ export type PublicScan = {
     tracked: boolean
 }
 
+export type EntryAnalytics = {
+    entry_id: number
+    scans: number
+    unique_visitors: number
+    current_votes: number
+}
+
+export type AdminEventAnalytics = {
+    total_scans: number
+    unique_visitors: number
+    current_votes: number
+    vote_changes: number
+    entries: EntryAnalytics[]
+}
+
 export class ApiError extends Error {
     constructor(
         public readonly status: number,
@@ -345,5 +360,13 @@ export function trackPublicScan(
                     voterToken,
             },
         },
+    )
+}
+
+export function getAdminEventAnalytics(
+    eventId: number,
+): Promise<AdminEventAnalytics> {
+    return request<AdminEventAnalytics>(
+        `/api/admin/events/${eventId}/analytics`,
     )
 }

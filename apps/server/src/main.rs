@@ -1,4 +1,5 @@
 mod admin;
+mod analytics;
 mod auth;
 mod entries;
 mod events;
@@ -91,7 +92,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let admin_api = admin::router()
         .merge(events::router())
-        .merge(entries::router());
+        .merge(entries::router())
+        .merge(analytics::router());
 
     let app = Router::new()
         .route("/health", get(health))
