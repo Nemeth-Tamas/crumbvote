@@ -1,5 +1,6 @@
 mod admin;
 mod auth;
+mod entries;
 mod events;
 
 use axum::{Json, Router, extract::State, http::StatusCode, routing::get};
@@ -68,7 +69,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         secure_cookies,
     };
 
-    let admin_api = admin::router().merge(events::router());
+    let admin_api = admin::router()
+        .merge(events::router())
+        .merge(entries::router());
 
     let app = Router::new()
         .route("/health", get(health))

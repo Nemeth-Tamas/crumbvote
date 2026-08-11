@@ -212,6 +212,54 @@ pub async fn update_event(
     Ok(Some(active_event.update(database).await?))
 }
 
+pub use entity::entry::Model as EntryModel;
+
+pub async fn list_entries(
+    database: &DatabaseConnection,
+    event_id: i32,
+) -> Result<Vec<EntryModel>, DbErr> {
+    entity::entry::Entity::find()
+        .filter(entity::entry::Column::EventId.eq(event_id))
+        .order_by_asc(entity::entry::Column::Number)
+        .all(database)
+        .await
+}
+
+pub async fn create_entry(
+    database: &DatabaseConnection,
+    event_id: i32,
+    name: String,
+    description: Option<String>,
+) -> Result<EntryModel, DbErr> {
+    let last_entry = entity::entry::Entity::find()
+        .filter(entity::entry::Column::EventId.eq(event_id))
+        .order_by_desc(entity::entry::Column::Number)
+        .one(database)
+        .await?;
+
+    let number = match last_entry {
+        Some(entry) => entry
+            .number
+            .checked_add(1)
+            .ok_or_else(|| DbErr::Custom("entry number overflow".to_owned()))?,
+        None => 1,
+    };
+
+    let now = unix_timestamp()?;
+
+    entity::entry::ActiveModel {
+        id: NotSet,
+        event_id: Set(event_id),
+        number: Set(number),
+        name: Set(name),
+        description: Set(description),
+        created_at: Set(now),
+        updated_at: Set(now),
+    }
+    .insert(database)
+    .await
+}
+
 fn unix_timestamp() -> Result<i64, DbErr> {
     let seconds = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -254,6 +302,13 @@ mod tests {
                 .has_table("events")
                 .await
                 .expect("events schema check should succeed")
+        );
+
+        assert!(
+            schema
+                .has_table("entries")
+                .await
+                .expect("entries schema check should succeed")
         );
 
         assert!(
@@ -336,6 +391,34 @@ mod tests {
             .expect("created event should exist");
 
         assert_eq!(fetched.slug, "cake-beauty-2026");
+
+        let first_entry = create_entry(
+            &database,
+            event.id,
+            "Strawberry Cake".to_owned(),
+            Some("Pink and suspiciously beautiful.".to_owned()),
+        )
+        .await
+        .expect("first entry should be created");
+
+        assert_eq!(first_entry.event_id, event.id);
+        assert_eq!(first_entry.number, 1);
+
+        let second_entry = create_entry(&database, event.id, "Chocolate Cake".to_owned(), None)
+            .await
+            .expect("second entry should be created");
+
+        assert_eq!(second_entry.number, 2);
+
+        let entries = list_entries(&database, event.id)
+            .await
+            .expect("entries should list");
+
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0].number, 1);
+        assert_eq!(entries[0].name, "Strawberry Cake");
+        assert_eq!(entries[1].number, 2);
+        assert_eq!(entries[1].name, "Chocolate Cake");
 
         let updated = update_event(
             &database,

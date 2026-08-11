@@ -2,6 +2,7 @@ use sea_orm_migration::prelude::*;
 
 mod m20260811_000001_create_admin_tables;
 mod m20260811_000002_create_events;
+mod m20260811_000003_create_entries;
 
 pub struct Migrator;
 
@@ -11,6 +12,7 @@ impl MigratorTrait for Migrator {
         vec![
             Box::new(m20260811_000001_create_admin_tables::Migration),
             Box::new(m20260811_000002_create_events::Migration),
+            Box::new(m20260811_000003_create_entries::Migration),
         ]
     }
 }
