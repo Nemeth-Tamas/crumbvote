@@ -19,6 +19,7 @@ const DATA_DIRECTORY: &str = "data";
 pub(crate) struct AppState {
     pub(crate) database: DatabaseConnection,
     pub(crate) setup_code: Arc<Mutex<Option<String>>>,
+    pub(crate) secure_cookies: bool,
 }
 
 #[derive(Serialize)]
@@ -57,9 +58,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Some(code)
     };
 
+    let secure_cookies = std::env::var("CRUMBVOTE_SECURE_COOKIES")
+        .is_ok_and(|value| value == "1" || value.eq_ignore_ascii_case("true"));
+
     let state = AppState {
         database,
         setup_code: Arc::new(Mutex::new(setup_code)),
+        secure_cookies,
     };
 
     let app = Router::new()

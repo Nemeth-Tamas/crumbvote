@@ -41,6 +41,15 @@ pub async fn admin_is_configured(database: &DatabaseConnection) -> Result<bool, 
     )
 }
 
+pub async fn admin_password_hash(database: &DatabaseConnection) -> Result<Option<String>, DbErr> {
+    Ok(
+        entity::admin_credential::Entity::find_by_id(ADMIN_CREDENTIAL_ID)
+            .one(database)
+            .await?
+            .map(|credential| credential.password_hash),
+    )
+}
+
 pub async fn create_admin_credential(
     database: &DatabaseConnection,
     password_hash: String,
@@ -55,6 +64,71 @@ pub async fn create_admin_credential(
     }
     .insert(database)
     .await?;
+
+    Ok(())
+}
+
+pub async fn create_admin_session(
+    database: &DatabaseConnection,
+    token_hash: String,
+    ttl_seconds: i64,
+) -> Result<(), DbErr> {
+    let now = unix_timestamp()?;
+
+    let expires_at = now
+        .checked_add(ttl_seconds)
+        .ok_or_else(|| DbErr::Custom("admin session expiration overflow".to_owned()))?;
+
+    entity::admin_session::ActiveModel {
+        token_hash: Set(token_hash),
+        created_at: Set(now),
+        expires_at: Set(expires_at),
+        last_seen_at: Set(now),
+    }
+    .insert(database)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn admin_session_is_valid(
+    database: &DatabaseConnection,
+    token_hash: &str,
+) -> Result<bool, DbErr> {
+    let session = entity::admin_session::Entity::find_by_id(token_hash.to_owned())
+        .one(database)
+        .await?;
+
+    let Some(session) = session else {
+        return Ok(false);
+    };
+
+    let now = unix_timestamp()?;
+
+    if session.expires_at <= now {
+        entity::admin_session::Entity::delete_by_id(token_hash.to_owned())
+            .exec(database)
+            .await?;
+
+        return Ok(false);
+    }
+
+    let mut active_session: entity::admin_session::ActiveModel = session.into();
+
+    active_session.last_seen_at = Set(now);
+
+    active_session.update(database).await?;
+
+    Ok(true)
+}
+
+pub async fn delete_admin_session(
+    database: &DatabaseConnection,
+    token_hash: &str,
+) -> Result<(), DbErr> {
+    entity::admin_session::Entity::delete_by_id(token_hash.to_owned())
+        .exec(database)
+        .await?;
 
     Ok(())
 }
@@ -110,6 +184,34 @@ mod tests {
             admin_is_configured(&database)
                 .await
                 .expect("admin configuration check should succeed")
+        );
+
+        assert_eq!(
+            admin_password_hash(&database)
+                .await
+                .expect("admin password hash lookup should succeed")
+                .as_deref(),
+            Some("test-password-hash")
+        );
+
+        create_admin_session(&database, "test-session-hash".to_owned(), 3600)
+            .await
+            .expect("admin session should be created");
+
+        assert!(
+            admin_session_is_valid(&database, "test-session-hash",)
+                .await
+                .expect("admin session validation should succeed")
+        );
+
+        delete_admin_session(&database, "test-session-hash")
+            .await
+            .expect("admin session should be deleted");
+
+        assert!(
+            !admin_session_is_valid(&database, "test-session-hash",)
+                .await
+                .expect("deleted admin session should be invalid")
         );
     }
 }
