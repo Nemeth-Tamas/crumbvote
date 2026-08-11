@@ -1,0 +1,19 @@
+# Rust
+/target/
+
+# Node
+node_modules/
+dist/
+
+# Runtime data
+/data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Environment
+.env
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
