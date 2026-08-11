@@ -12,6 +12,7 @@
         type AdminEventAnalytics,
         type CrumbEntry,
         type CrumbEvent,
+        type EntryAnalytics,
         type EventStatus,
     } from "../lib/api";
 
@@ -402,6 +403,114 @@
             (analytics.current_votes / analytics.unique_visitors) * 100;
 
         return `${Math.round(percentage)}%`;
+    }
+
+    function rankedEntryAnalytics(): Array<{
+        entry: CrumbEntry;
+        analytics: EntryAnalytics;
+    }> {
+        if (analytics === null) {
+            return [];
+        }
+
+        const byEntry = new Map(
+            analytics.entries.map((entry) => [entry.entry_id, entry]),
+        );
+
+        return entries
+            .map((entry) => ({
+                entry,
+                analytics: byEntry.get(entry.id) ?? {
+                    entry_id: entry.id,
+                    scans: 0,
+                    unique_visitors: 0,
+                    current_votes: 0,
+                },
+            }))
+            .sort((left, right) => {
+                return (
+                    right.analytics.current_votes -
+                        left.analytics.current_votes ||
+                    right.analytics.unique_visitors -
+                        left.analytics.unique_visitors ||
+                    right.analytics.scans - left.analytics.scans ||
+                    left.entry.number - right.entry.number
+                );
+            });
+    }
+
+    function voteShare(currentVotes: number): string {
+        if (analytics === null || analytics.current_votes === 0) {
+            return "0%";
+        }
+
+        const percentage = (currentVotes / analytics.current_votes) * 100;
+
+        return `${Math.round(percentage)}%`;
+    }
+
+    function entryConversionRate(entryAnalytics: EntryAnalytics): string {
+        if (entryAnalytics.unique_visitors === 0) {
+            return entryAnalytics.current_votes === 0 ? "0%" : "—";
+        }
+
+        const percentage =
+            (entryAnalytics.current_votes / entryAnalytics.unique_visitors) *
+            100;
+
+        return `${Math.round(percentage)}%`;
+    }
+
+    function activityKindLabel(kind: string): string {
+        switch (kind) {
+            case "scan":
+                return "Scan / open";
+
+            case "vote":
+                return "Vote recorded";
+
+            case "vote_change":
+                return "Vote changed";
+
+            default:
+                return kind;
+        }
+    }
+
+    function activityEntryLabel(entryId: number): string {
+        const entry = entries.find((candidate) => candidate.id === entryId);
+
+        if (entry === undefined) {
+            return `Entry ${entryId}`;
+        }
+
+        return `#${entry.number} ${entry.name}`;
+    }
+
+    function signalLabel(code: string): string {
+        switch (code) {
+            case "high_scan_repeaters":
+                return "Repeated scanning";
+
+            case "frequent_vote_changers":
+                return "Frequent vote changes";
+
+            default:
+                return code;
+        }
+    }
+
+    function signalDescription(code: string): string {
+        switch (code) {
+            case "high_scan_repeaters":
+                return "One or more browser identities opened entries unusually often.";
+
+            case "frequent_vote_changers":
+                return "One or more browser identities changed their vote repeatedly.";
+
+            default:
+                return "This activity may be worth reviewing.";
+        }
     }
 </script>
 
@@ -954,6 +1063,321 @@
                 </div>
             {/if}
         </div>
+
+        {#if analytics !== null}
+            <section
+                aria-labelledby="analyse-title"
+                class="mt-6 rounded-[2rem] border border-white/10 bg-white/[0.025] p-6 sm:p-8"
+            >
+                <div>
+                    <div
+                        class="mb-3 inline-flex rounded-full border border-fuchsia-400/15 bg-fuchsia-400/10 px-3 py-1 text-xs font-medium text-fuchsia-300"
+                    >
+                        Event intelligence
+                    </div>
+
+                    <h2
+                        id="analyse-title"
+                        class="text-2xl font-semibold tracking-tight"
+                    >
+                        Analyse
+                    </h2>
+
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                        Entry performance, recent activity and lightweight
+                        signals that may be worth reviewing.
+                    </p>
+                </div>
+
+                <div
+                    class="mt-7 grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]"
+                >
+                    <div>
+                        <h3 class="text-lg font-semibold">Entry performance</h3>
+
+                        <p class="mt-1 text-sm text-slate-500">
+                            Ranked by current votes, then visitors and scans.
+                        </p>
+
+                        {#if entries.length === 0}
+                            <div
+                                class="mt-5 rounded-2xl border border-dashed border-white/10 px-5 py-10 text-center text-sm text-slate-600"
+                            >
+                                No entries to analyse yet.
+                            </div>
+                        {:else}
+                            <div class="mt-5 space-y-3">
+                                {#each rankedEntryAnalytics() as item, index (item.entry.id)}
+                                    <article
+                                        data-testid={"analytics-entry-" +
+                                            item.entry.id}
+                                        class="rounded-2xl border border-white/10 bg-slate-950/40 p-5"
+                                    >
+                                        <div
+                                            class="flex items-start justify-between gap-4"
+                                        >
+                                            <div
+                                                class="flex min-w-0 items-center gap-3"
+                                            >
+                                                <div
+                                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-400/10 font-mono text-sm font-semibold text-violet-300"
+                                                >
+                                                    {index + 1}
+                                                </div>
+
+                                                <div class="min-w-0">
+                                                    <div
+                                                        class="truncate font-semibold"
+                                                    >
+                                                        #{item.entry.number}
+                                                        {item.entry.name}
+                                                    </div>
+
+                                                    <div
+                                                        class="mt-1 text-xs text-slate-600"
+                                                    >
+                                                        Entry #{item.entry.id}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5"
+                                        >
+                                            <div
+                                                class="rounded-xl bg-black/20 p-3"
+                                            >
+                                                <div
+                                                    class="text-xl font-semibold"
+                                                >
+                                                    {item.analytics
+                                                        .current_votes}
+                                                </div>
+
+                                                <div
+                                                    class="mt-1 text-xs text-slate-600"
+                                                >
+                                                    Current votes
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                class="rounded-xl bg-black/20 p-3"
+                                            >
+                                                <div
+                                                    class="text-xl font-semibold"
+                                                >
+                                                    {voteShare(
+                                                        item.analytics
+                                                            .current_votes,
+                                                    )}
+                                                </div>
+
+                                                <div
+                                                    class="mt-1 text-xs text-slate-600"
+                                                >
+                                                    Vote share
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                class="rounded-xl bg-black/20 p-3"
+                                            >
+                                                <div
+                                                    class="text-xl font-semibold"
+                                                >
+                                                    {item.analytics.scans}
+                                                </div>
+
+                                                <div
+                                                    class="mt-1 text-xs text-slate-600"
+                                                >
+                                                    Scans
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                class="rounded-xl bg-black/20 p-3"
+                                            >
+                                                <div
+                                                    class="text-xl font-semibold"
+                                                >
+                                                    {item.analytics
+                                                        .unique_visitors}
+                                                </div>
+
+                                                <div
+                                                    class="mt-1 text-xs text-slate-600"
+                                                >
+                                                    Visitors
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                class="col-span-2 rounded-xl bg-black/20 p-3 sm:col-span-1"
+                                            >
+                                                <div
+                                                    class="text-xl font-semibold"
+                                                >
+                                                    {entryConversionRate(
+                                                        item.analytics,
+                                                    )}
+                                                </div>
+
+                                                <div
+                                                    class="mt-1 text-xs text-slate-600"
+                                                >
+                                                    Conversion
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
+
+                    <div class="space-y-6">
+                        <article
+                            class="rounded-2xl border border-white/10 bg-slate-950/40 p-5"
+                        >
+                            <div
+                                class="flex items-center justify-between gap-3"
+                            >
+                                <div>
+                                    <h3 class="font-semibold">
+                                        Review signals
+                                    </h3>
+
+                                    <p
+                                        class="mt-1 text-xs leading-5 text-slate-600"
+                                    >
+                                        Heuristics only — not proof of abuse.
+                                    </p>
+                                </div>
+
+                                <div
+                                    class="rounded-xl bg-white/5 px-3 py-2 font-mono text-sm text-slate-400"
+                                >
+                                    {analytics.signals.length}
+                                </div>
+                            </div>
+
+                            {#if analytics.signals.length === 0}
+                                <div
+                                    class="mt-5 rounded-xl border border-emerald-400/10 bg-emerald-400/[0.06] px-4 py-3"
+                                >
+                                    <div
+                                        class="text-sm font-medium text-emerald-300"
+                                    >
+                                        No unusual activity signals.
+                                    </div>
+
+                                    <p
+                                        class="mt-1 text-xs leading-5 text-slate-500"
+                                    >
+                                        Nothing currently crosses the review
+                                        thresholds.
+                                    </p>
+                                </div>
+                            {:else}
+                                <div class="mt-5 space-y-3">
+                                    {#each analytics.signals as signal}
+                                        <div
+                                            class="rounded-xl border border-amber-400/15 bg-amber-400/[0.07] p-4"
+                                        >
+                                            <div
+                                                class="flex items-start justify-between gap-3"
+                                            >
+                                                <div
+                                                    class="font-medium text-amber-200"
+                                                >
+                                                    {signalLabel(signal.code)}
+                                                </div>
+
+                                                <div
+                                                    class="shrink-0 font-mono text-xs text-amber-300"
+                                                >
+                                                    {signal.affected_visitors}
+                                                    {signal.affected_visitors ===
+                                                    1
+                                                        ? "visitor"
+                                                        : "visitors"}
+                                                </div>
+                                            </div>
+
+                                            <p
+                                                class="mt-2 text-xs leading-5 text-slate-500"
+                                            >
+                                                {signalDescription(signal.code)}
+                                            </p>
+                                        </div>
+                                    {/each}
+                                </div>
+                            {/if}
+                        </article>
+
+                        <article
+                            class="rounded-2xl border border-white/10 bg-slate-950/40 p-5"
+                        >
+                            <h3 class="font-semibold">Recent activity</h3>
+
+                            <p class="mt-1 text-xs leading-5 text-slate-600">
+                                Latest scans and voting actions.
+                            </p>
+
+                            {#if analytics.recent_activity.length === 0}
+                                <div
+                                    class="mt-5 rounded-xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-slate-600"
+                                >
+                                    No public activity yet.
+                                </div>
+                            {:else}
+                                <div class="mt-5 space-y-2">
+                                    {#each analytics.recent_activity as activity}
+                                        <div
+                                            class="rounded-xl border border-white/5 bg-black/20 p-3"
+                                        >
+                                            <div
+                                                class="flex items-start justify-between gap-3"
+                                            >
+                                                <div class="min-w-0">
+                                                    <div
+                                                        class="text-sm font-medium text-slate-300"
+                                                    >
+                                                        {activityKindLabel(
+                                                            activity.kind,
+                                                        )}
+                                                    </div>
+
+                                                    <div
+                                                        class="mt-1 truncate text-xs text-slate-600"
+                                                    >
+                                                        {activityEntryLabel(
+                                                            activity.entry_id,
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <time
+                                                    class="shrink-0 text-right text-[0.7rem] text-slate-700"
+                                                >
+                                                    {new Date(
+                                                        activity.created_at *
+                                                            1000,
+                                                    ).toLocaleString()}
+                                                </time>
+                                            </div>
+                                        </div>
+                                    {/each}
+                                </div>
+                            {/if}
+                        </article>
+                    </div>
+                </div>
+            </section>
+        {/if}
     </section>
 
     {#if createEntryOpen}

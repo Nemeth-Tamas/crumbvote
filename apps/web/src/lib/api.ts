@@ -100,12 +100,25 @@ export type EntryAnalytics = {
     current_votes: number
 }
 
+export type RecentActivity = {
+    kind: string
+    entry_id: number
+    created_at: number
+}
+
+export type AnalyticsSignal = {
+    code: string
+    affected_visitors: number
+}
+
 export type AdminEventAnalytics = {
     total_scans: number
     unique_visitors: number
     current_votes: number
     vote_changes: number
     entries: EntryAnalytics[]
+    recent_activity: RecentActivity[]
+    signals: AnalyticsSignal[]
 }
 
 export class ApiError extends Error {

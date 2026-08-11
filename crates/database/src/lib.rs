@@ -415,6 +415,7 @@ pub async fn list_activity_events(
     entity::activity_event::Entity::find()
         .filter(entity::activity_event::Column::EventId.eq(event_id))
         .order_by_asc(entity::activity_event::Column::CreatedAt)
+        .order_by_asc(entity::activity_event::Column::Id)
         .all(database)
         .await
 }

@@ -637,5 +637,105 @@ test(
         await expect(
             changesCard,
         ).toContainText('1')
+
+        await expect(
+            page.getByRole(
+                'heading',
+                {
+                    name: 'Analyse',
+                },
+            ),
+        ).toBeVisible()
+
+        const rankedEntries =
+            page.getByTestId(
+                /analytics-entry-/,
+            )
+
+        await expect(
+            rankedEntries.first(),
+        ).toHaveAttribute(
+            'data-testid',
+            'analytics-entry-2',
+        )
+
+        const chocolateAnalytics =
+            page.getByTestId(
+                'analytics-entry-2',
+            )
+
+        await expect(
+            chocolateAnalytics,
+        ).toContainText(
+            /1\s*Current votes/,
+        )
+
+        await expect(
+            chocolateAnalytics,
+        ).toContainText(
+            /100%\s*Vote share/,
+        )
+
+        await expect(
+            chocolateAnalytics,
+        ).toContainText(
+            /2\s*Scans/,
+        )
+
+        await expect(
+            chocolateAnalytics,
+        ).toContainText(
+            /100%\s*Conversion/,
+        )
+
+        const raspberryAnalytics =
+            page.getByTestId(
+                'analytics-entry-1',
+            )
+
+        await expect(
+            raspberryAnalytics,
+        ).toContainText(
+            /0\s*Current votes/,
+        )
+
+        await expect(
+            raspberryAnalytics,
+        ).toContainText(
+            /0%\s*Vote share/,
+        )
+
+        await expect(
+            raspberryAnalytics,
+        ).toContainText(
+            /3\s*Scans/,
+        )
+
+        await expect(
+            raspberryAnalytics,
+        ).toContainText(
+            /0%\s*Conversion/,
+        )
+
+        await expect(
+            page.getByText(
+                'No unusual activity signals.',
+            ),
+        ).toBeVisible()
+
+        await expect(
+            page.getByRole(
+                'heading',
+                {
+                    name: 'Recent activity',
+                },
+            ),
+        ).toBeVisible()
+
+        await expect(
+            page.getByText(
+                'Vote changed',
+            ),
+        ).toBeVisible()
     },
 )
