@@ -11,6 +11,7 @@ use axum::{
 };
 use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 const VOTER_COOKIE: &str = "crumbvote_voter";
 
@@ -69,9 +70,26 @@ struct ScanResponse {
     tracked: bool,
 }
 
+#[derive(Serialize)]
+struct PublicResultEntryResponse {
+    id: i32,
+    number: i32,
+    name: String,
+    image_url: Option<String>,
+    current_votes: usize,
+}
+
+#[derive(Serialize)]
+struct PublicResultsResponse {
+    event: PublicEventResponse,
+    total_votes: usize,
+    entries: Vec<PublicResultEntryResponse>,
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/voter", post(ensure_voter))
+        .route("/events/{slug}/results", get(get_public_results))
         .route("/events/{slug}/entries/{entry_id}", get(get_public_entry))
         .route(
             "/events/{slug}/entries/{entry_id}/scan",
@@ -132,6 +150,76 @@ async fn get_public_entry(
             description: entry.description,
             image_url,
         },
+    }))
+}
+
+async fn get_public_results(
+    State(state): State<AppState>,
+    Path(slug): Path<String>,
+) -> Result<Json<PublicResultsResponse>, ApiError> {
+    let event = require_public_event(&state, &slug).await?;
+
+    if !event.results_public {
+        return Err(api_error(
+            StatusCode::NOT_FOUND,
+            "public_results_unavailable",
+        ));
+    }
+
+    let event_id = event.id;
+
+    let entries = crumbvote_database::list_entries(&state.database, event_id)
+        .await
+        .map_err(|error| {
+            eprintln!("Failed to load public results entries: {error}");
+
+            api_error(StatusCode::INTERNAL_SERVER_ERROR, "database_error")
+        })?;
+
+    let votes = crumbvote_database::list_votes(&state.database, event_id)
+        .await
+        .map_err(|error| {
+            eprintln!("Failed to load public results votes: {error}");
+
+            api_error(StatusCode::INTERNAL_SERVER_ERROR, "database_error")
+        })?;
+
+    let mut vote_counts: HashMap<i32, usize> = HashMap::new();
+
+    for vote in &votes {
+        *vote_counts.entry(vote.entry_id).or_default() += 1;
+    }
+
+    let mut results = entries
+        .into_iter()
+        .map(|entry| PublicResultEntryResponse {
+            id: entry.id,
+            number: entry.number,
+            name: entry.name,
+            image_url: entry
+                .image_filename
+                .map(|filename| format!("/media/entries/{filename}")),
+            current_votes: vote_counts.get(&entry.id).copied().unwrap_or(0),
+        })
+        .collect::<Vec<_>>();
+
+    results.sort_by(|left, right| {
+        right
+            .current_votes
+            .cmp(&left.current_votes)
+            .then_with(|| left.number.cmp(&right.number))
+    });
+
+    Ok(Json(PublicResultsResponse {
+        event: PublicEventResponse {
+            slug: event.slug,
+            title: event.title,
+            description: event.description,
+            status: event.status,
+            results_public: event.results_public,
+        },
+        total_votes: votes.len(),
+        entries: results,
     }))
 }
 

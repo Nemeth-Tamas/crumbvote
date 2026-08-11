@@ -444,6 +444,16 @@
                         </p>
                     </div>
                 {/if}
+
+                {#if payload.event.results_public}
+                    <a
+                        href={`/e/${payload.event.slug}/results`}
+                        class="mt-5 flex items-center justify-between rounded-2xl border border-violet-400/15 bg-violet-400/[0.07] px-5 py-4 text-sm font-medium text-violet-200 transition hover:bg-violet-400/10"
+                    >
+                        <span>View public results</span>
+                        <span>→</span>
+                    </a>
+                {/if}
             </section>
         {/if}
     </div>

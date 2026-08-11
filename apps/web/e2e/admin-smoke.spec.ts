@@ -355,6 +355,38 @@ test(
             ),
         ).toBeVisible()
 
+        const publicResultsSave =
+            page.waitForResponse(
+                (response) =>
+                    response
+                        .url()
+                        .endsWith(
+                            '/api/admin/events/1',
+                        ) &&
+                    response
+                        .request()
+                        .method() === 'PATCH',
+            )
+
+        await page
+            .getByLabel(
+                'Public results',
+            )
+            .check()
+
+        await page
+            .getByRole(
+                'button',
+                {
+                    name: 'Save changes',
+                },
+            )
+            .click()
+
+        expect(
+            (await publicResultsSave).ok(),
+        ).toBeTruthy()
+
         await expect(
             page
                 .getByRole(
@@ -555,6 +587,55 @@ test(
                 },
             ),
         ).toBeVisible()
+
+        await page
+            .getByRole(
+                'link',
+                {
+                    name: 'View public results',
+                },
+            )
+            .click()
+
+        await expect(page).toHaveURL(
+            '/e/e2e-cake-show/results',
+        )
+
+        const publicResults =
+            page.getByTestId(
+                /public-result-entry-/,
+            )
+
+        await expect(
+            publicResults.first(),
+        ).toHaveAttribute(
+            'data-testid',
+            'public-result-entry-2',
+        )
+
+        await expect(
+            page.getByTestId(
+                'public-result-entry-2',
+            ),
+        ).toContainText(
+            /1\s*Votes/,
+        )
+
+        await expect(
+            page.getByTestId(
+                'public-result-entry-2',
+            ),
+        ).toContainText(
+            /100%\s*Vote share/,
+        )
+
+        await expect(
+            page.getByTestId(
+                'public-result-entry-1',
+            ),
+        ).toContainText(
+            /0\s*Votes/,
+        )
 
         await page.goto('/admin')
 
@@ -766,5 +847,45 @@ test(
                 'Vote changed',
             ),
         ).toBeVisible()
+
+        const downloadPromise =
+            page.waitForEvent(
+                'download',
+            )
+
+        await page
+            .getByRole(
+                'button',
+                {
+                    name: 'Export CSV',
+                },
+            )
+            .click()
+
+        const download =
+            await downloadPromise
+
+        expect(
+            download.suggestedFilename(),
+        ).toBe(
+            'crumbvote-e2e-cake-show-analytics.csv',
+        )
+
+        const stream =
+            await download.createReadStream()
+
+        let csv = ''
+
+        for await (const chunk of stream) {
+            csv += chunk.toString()
+        }
+
+        expect(csv).toContain(
+            '"1","2","E2E Chocolate Cake","1","100%","2","1","100%"',
+        )
+
+        expect(csv).toContain(
+            '"2","1","E2E Raspberry Cake Deluxe","0","0%","3","1","0%"',
+        )
     },
 )

@@ -2,6 +2,7 @@
   import AdminPage from "./pages/AdminPage.svelte";
   import LandingPage from "./pages/LandingPage.svelte";
   import PublicEntryPage from "./pages/PublicEntryPage.svelte";
+  import PublicResultsPage from "./pages/PublicResultsPage.svelte";
 
   const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
 
@@ -9,6 +10,10 @@
 
   const adminEventId =
     adminEventMatch !== null ? Number.parseInt(adminEventMatch[1], 10) : null;
+
+  const publicResultsMatch = pathname.match(/^\/e\/([a-z0-9-]+)\/results$/);
+
+  const publicResultsSlug = publicResultsMatch?.[1] ?? null;
 
   const publicEntryMatch = pathname.match(/^\/e\/([a-z0-9-]+)\/(\d+)$/);
 
@@ -22,6 +27,8 @@
 
 {#if isAdminRoute}
   <AdminPage initialEventId={adminEventId} />
+{:else if publicResultsSlug !== null}
+  <PublicResultsPage eventSlug={publicResultsSlug} />
 {:else if publicEventSlug !== null && publicEntryId !== null}
   <PublicEntryPage eventSlug={publicEventSlug} entryId={publicEntryId} />
 {:else}

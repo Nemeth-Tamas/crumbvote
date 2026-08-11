@@ -81,6 +81,20 @@ export type PublicEntryPayload = {
     entry: PublicEntry
 }
 
+export type PublicResultEntry = {
+    id: number
+    number: number
+    name: string
+    image_url: string | null
+    current_votes: number
+}
+
+export type PublicResultsPayload = {
+    event: PublicEvent
+    total_votes: number
+    entries: PublicResultEntry[]
+}
+
 export type PublicVoterIdentity = {
     token: string
 }
@@ -309,6 +323,14 @@ export function getPublicEntry(
 ): Promise<PublicEntryPayload> {
     return request<PublicEntryPayload>(
         `/api/public/events/${eventSlug}/entries/${entryId}`,
+    )
+}
+
+export function getPublicResults(
+    eventSlug: string,
+): Promise<PublicResultsPayload> {
+    return request<PublicResultsPayload>(
+        `/api/public/events/${eventSlug}/results`,
     )
 }
 

@@ -512,6 +512,68 @@
                 return "This activity may be worth reviewing.";
         }
     }
+
+    function exportAnalyticsCsv() {
+        if (event === null || analytics === null) {
+            return;
+        }
+
+        const rows: Array<Array<string | number>> = [
+            [
+                "rank",
+                "entry_number",
+                "entry_name",
+                "current_votes",
+                "vote_share",
+                "scans",
+                "unique_visitors",
+                "conversion",
+            ],
+        ];
+
+        rankedEntryAnalytics().forEach((item, index) => {
+            rows.push([
+                index + 1,
+                item.entry.number,
+                item.entry.name,
+                item.analytics.current_votes,
+                voteShare(item.analytics.current_votes),
+                item.analytics.scans,
+                item.analytics.unique_visitors,
+                entryConversionRate(item.analytics),
+            ]);
+        });
+
+        const csv = rows.map((row) => row.map(csvCell).join(",")).join("\r\n");
+
+        const blob = new Blob(["\uFEFF", csv], {
+            type: "text/csv;charset=utf-8",
+        });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = `crumbvote-${event.slug}-analytics.csv`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        window.setTimeout(() => {
+            URL.revokeObjectURL(url);
+        }, 0);
+    }
+
+    function csvCell(value: string | number): string {
+        let text = String(value);
+
+        if (/^[=+\-@]/.test(text)) {
+            text = `'${text}`;
+        }
+
+        return `"${text.replace(/"/g, '""')}"`;
+    }
 </script>
 
 {#if loading}
@@ -1069,24 +1131,38 @@
                 aria-labelledby="analyse-title"
                 class="mt-6 rounded-[2rem] border border-white/10 bg-white/[0.025] p-6 sm:p-8"
             >
-                <div>
-                    <div
-                        class="mb-3 inline-flex rounded-full border border-fuchsia-400/15 bg-fuchsia-400/10 px-3 py-1 text-xs font-medium text-fuchsia-300"
-                    >
-                        Event intelligence
+                <div
+                    class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+                >
+                    <div>
+                        <div
+                            class="mb-3 inline-flex rounded-full border border-fuchsia-400/15 bg-fuchsia-400/10 px-3 py-1 text-xs font-medium text-fuchsia-300"
+                        >
+                            Event intelligence
+                        </div>
+
+                        <h2
+                            id="analyse-title"
+                            class="text-2xl font-semibold tracking-tight"
+                        >
+                            Analyse
+                        </h2>
+
+                        <p
+                            class="mt-2 max-w-2xl text-sm leading-6 text-slate-500"
+                        >
+                            Entry performance, recent activity and lightweight
+                            signals that may be worth reviewing.
+                        </p>
                     </div>
 
-                    <h2
-                        id="analyse-title"
-                        class="text-2xl font-semibold tracking-tight"
+                    <button
+                        type="button"
+                        onclick={exportAnalyticsCsv}
+                        class="w-fit shrink-0 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
                     >
-                        Analyse
-                    </h2>
-
-                    <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                        Entry performance, recent activity and lightweight
-                        signals that may be worth reviewing.
-                    </p>
+                        Export CSV
+                    </button>
                 </div>
 
                 <div
