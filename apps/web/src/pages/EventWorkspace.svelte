@@ -658,7 +658,7 @@
         </div>
 
         {#if analytics !== null}
-            <section class="mt-6">
+            <section data-testid="analytics-summary" class="mt-6">
                 <div class="mb-4 flex items-end justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-semibold">Analytics</h2>

@@ -188,6 +188,14 @@ test(
                     hasText:
                         'E2E Raspberry Cake',
                 })
+                .filter({
+                    has: page.getByRole(
+                        'button',
+                        {
+                            name: 'Edit',
+                        },
+                    ),
+                })
 
         await expect(entryCard).toBeVisible()
 
@@ -252,6 +260,14 @@ test(
                     hasText:
                         'E2E Raspberry Cake Deluxe',
                 })
+                .filter({
+                    has: page.getByRole(
+                        'button',
+                        {
+                            name: 'Edit',
+                        },
+                    ),
+                })
 
         await expect(
             editedEntryCard,
@@ -310,6 +326,14 @@ test(
                 .filter({
                     hasText:
                         'E2E Chocolate Cake',
+                })
+                .filter({
+                    has: page.getByRole(
+                        'button',
+                        {
+                            name: 'Edit',
+                        },
+                    ),
                 }),
         ).toBeVisible()
 
@@ -583,8 +607,13 @@ test(
             )
             .click()
 
+        const analyticsSummary =
+            page.getByTestId(
+                'analytics-summary',
+            )
+
         const scansCard =
-            page
+            analyticsSummary
                 .getByRole('article')
                 .filter({
                     hasText: 'Scans / opens',
@@ -595,7 +624,7 @@ test(
         ).toContainText('5')
 
         const visitorsCard =
-            page
+            analyticsSummary
                 .getByRole('article')
                 .filter({
                     hasText: 'Unique visitors',
@@ -606,7 +635,7 @@ test(
         ).toContainText('1')
 
         const votesCard =
-            page
+            analyticsSummary
                 .getByRole('article')
                 .filter({
                     hasText: 'Current votes',
@@ -617,7 +646,7 @@ test(
         ).toContainText('1')
 
         const conversionCard =
-            page
+            analyticsSummary
                 .getByRole('article')
                 .filter({
                     hasText: 'Conversion',
@@ -628,7 +657,7 @@ test(
         ).toContainText('100%')
 
         const changesCard =
-            page
+            analyticsSummary
                 .getByRole('article')
                 .filter({
                     hasText: 'Vote changes',
