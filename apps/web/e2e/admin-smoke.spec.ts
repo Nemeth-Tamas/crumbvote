@@ -461,9 +461,22 @@ test(
             ),
         ).toBeVisible()
 
+        await page.evaluate(() => {
+            window.localStorage.setItem(
+                'crumbvote_locale',
+                'en',
+            )
+        })
+
         await page.goto(
             '/e/e2e-cake-show/1',
         )
+
+        await expect(
+            page.getByTestId(
+                'language-selector',
+            ),
+        ).toHaveValue('en')
 
         await expect(
             page.getByRole(

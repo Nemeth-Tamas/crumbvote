@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import LanguageSelector from "../components/LanguageSelector.svelte";
     import {
         ApiError,
         castPublicVote,
@@ -9,6 +10,7 @@
         trackPublicScan,
         type PublicEntryPayload,
     } from "../lib/api";
+    import { locale, translate } from "../lib/i18n";
 
     const VOTER_STORAGE_KEY = "crumbvote_voter_token";
 
@@ -116,7 +118,9 @@
             currentVoteEntryId = vote.entry_id;
 
             voteSuccessMessage =
-                previousVote === null ? "Vote recorded." : "Vote changed.";
+                previousVote === null
+                    ? translate($locale, "entry.voteRecorded")
+                    : translate($locale, "entry.voteChanged");
         } catch (error) {
             voteErrorMessage = describeError(error);
         } finally {
@@ -126,35 +130,37 @@
 
     function describeError(error: unknown): string {
         if (!(error instanceof ApiError)) {
-            return "CrumbVote could not reach the server.";
+            return translate($locale, "entry.errorDatabase");
         }
 
         switch (error.code) {
             case "public_entry_not_found":
-                return "This voting entry could not be found.";
+                return translate($locale, "entry.errorNotFound");
 
             case "database_error":
-                return "CrumbVote could not load this entry.";
+                return translate($locale, "entry.errorDatabase");
 
             case "voter_token_required":
             case "invalid_voter_token":
-                return "CrumbVote could not identify this browser.";
+                return translate($locale, "entry.errorBrowser");
 
             case "voter_creation_failed":
-                return "CrumbVote could not create a voter identity.";
+                return translate($locale, "entry.errorVoterCreation");
 
             case "voting_not_open":
-                return "Voting is not currently open.";
+                return translate($locale, "entry.errorVotingNotOpen");
 
             default:
-                return `The request failed with error "${error.code}".`;
+                return translate($locale, "common.requestFailed", {
+                    code: error.code,
+                });
         }
     }
 </script>
 
 <svelte:head>
     <title>
-        {payload?.entry.name ?? "Vote"} · CrumbVote
+        {payload?.entry.name ?? translate($locale, "entry.pageTitle")} · CrumbVote
     </title>
 </svelte:head>
 
@@ -184,7 +190,7 @@
                 <span>CrumbVote</span>
             </a>
 
-            <span class="text-xs text-slate-600"> Public voting </span>
+            <LanguageSelector />
         </header>
 
         {#if loading}
@@ -194,7 +200,9 @@
                         class="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-white/10 border-t-violet-400"
                     ></div>
 
-                    <div class="mt-5 font-medium">Loading entry…</div>
+                    <div class="mt-5 font-medium">
+                        {translate($locale, "entry.loading")}
+                    </div>
                 </div>
             </section>
         {:else if payload === null}
@@ -208,7 +216,9 @@
                         !
                     </div>
 
-                    <h1 class="mt-5 text-2xl font-semibold">Entry not found</h1>
+                    <h1 class="mt-5 text-2xl font-semibold">
+                        {translate($locale, "entry.notFoundTitle")}
+                    </h1>
 
                     <p class="mt-3 leading-7 text-slate-400">
                         {errorMessage}
@@ -218,7 +228,7 @@
                         href="/"
                         class="mt-6 inline-flex rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
                     >
-                        Back to CrumbVote
+                        {translate($locale, "common.backToCrumbVote")}
                     </a>
                 </div>
             </section>
@@ -233,7 +243,7 @@
                                 class="h-1.5 w-1.5 rounded-full bg-emerald-400"
                             ></span>
 
-                            Voting is open
+                            {translate($locale, "entry.statusOpen")}
                         </span>
                     {:else if payload.event.status === "closed"}
                         <span
@@ -242,7 +252,7 @@
                             <span class="h-1.5 w-1.5 rounded-full bg-slate-400"
                             ></span>
 
-                            Voting has ended
+                            {translate($locale, "entry.statusClosed")}
                         </span>
                     {:else}
                         <span
@@ -251,7 +261,7 @@
                             <span class="h-1.5 w-1.5 rounded-full bg-violet-400"
                             ></span>
 
-                            Voting has not started
+                            {translate($locale, "entry.statusDraft")}
                         </span>
                     {/if}
 
@@ -284,7 +294,7 @@
                                     </div>
 
                                     <div class="mt-3 text-sm text-slate-600">
-                                        No image
+                                        {translate($locale, "common.noImage")}
                                     </div>
                                 </div>
                             </div>
@@ -299,7 +309,9 @@
 
                     <div class="p-6 sm:p-8">
                         <div class="text-sm font-medium text-violet-300">
-                            Entry #{payload.entry.number}
+                            {translate($locale, "entry.number", {
+                                number: payload.entry.number,
+                            })}
                         </div>
 
                         <h1
@@ -310,7 +322,7 @@
 
                         <p class="mt-4 text-base leading-7 text-slate-400">
                             {payload.entry.description ??
-                                "No description was provided for this entry."}
+                                translate($locale, "entry.noDescription")}
                         </p>
 
                         <div class="mt-7 border-t border-white/10 pt-6">
@@ -322,15 +334,19 @@
                                         <div
                                             class="font-semibold text-emerald-200"
                                         >
-                                            This is your current vote
+                                            {translate(
+                                                $locale,
+                                                "entry.currentVoteTitle",
+                                            )}
                                         </div>
 
                                         <p
                                             class="mt-2 text-sm leading-6 text-slate-400"
                                         >
-                                            You can visit another entry and move
-                                            your vote there while voting remains
-                                            open.
+                                            {translate(
+                                                $locale,
+                                                "entry.currentVoteDescription",
+                                            )}
                                         </p>
 
                                         <button
@@ -338,27 +354,39 @@
                                             disabled
                                             class="mt-5 w-full cursor-default rounded-xl bg-emerald-300 px-5 py-3.5 text-sm font-semibold text-emerald-950"
                                         >
-                                            Your vote ✓
+                                            {translate(
+                                                $locale,
+                                                "entry.yourVote",
+                                            )}
                                         </button>
                                     {:else}
                                         <div
                                             class="font-semibold text-emerald-200"
                                         >
                                             {currentVoteEntryId === null
-                                                ? "Ready to vote?"
-                                                : "Change your vote?"}
+                                                ? translate(
+                                                      $locale,
+                                                      "entry.readyTitle",
+                                                  )
+                                                : translate(
+                                                      $locale,
+                                                      "entry.changeTitle",
+                                                  )}
                                         </div>
 
                                         <p
                                             class="mt-2 text-sm leading-6 text-slate-400"
                                         >
                                             {#if currentVoteEntryId === null}
-                                                Choose this entry as your vote
-                                                for the event.
+                                                {translate(
+                                                    $locale,
+                                                    "entry.readyDescription",
+                                                )}
                                             {:else}
-                                                You already voted for another
-                                                entry. Choosing this one moves
-                                                your vote here.
+                                                {translate(
+                                                    $locale,
+                                                    "entry.changeDescription",
+                                                )}
                                             {/if}
                                         </p>
 
@@ -369,12 +397,28 @@
                                             class="mt-5 w-full rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-950/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {#if voteBusy}
-                                                Saving vote…
+                                                {translate(
+                                                    $locale,
+                                                    "entry.savingVote",
+                                                )}
                                             {:else if currentVoteEntryId === null}
-                                                Vote for #{payload.entry.number}
+                                                {translate(
+                                                    $locale,
+                                                    "entry.voteFor",
+                                                    {
+                                                        number: payload.entry
+                                                            .number,
+                                                    },
+                                                )}
                                             {:else}
-                                                Change vote to #{payload.entry
-                                                    .number}
+                                                {translate(
+                                                    $locale,
+                                                    "entry.changeVoteTo",
+                                                    {
+                                                        number: payload.entry
+                                                            .number,
+                                                    },
+                                                )}
                                             {/if}
                                         </button>
                                     {/if}
@@ -400,13 +444,19 @@
                                     class="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
                                 >
                                     <div class="font-semibold">
-                                        Voting is closed
+                                        {translate(
+                                            $locale,
+                                            "entry.closedTitle",
+                                        )}
                                     </div>
 
                                     <p
                                         class="mt-2 text-sm leading-6 text-slate-500"
                                     >
-                                        This event is no longer accepting votes.
+                                        {translate(
+                                            $locale,
+                                            "entry.closedDescription",
+                                        )}
                                     </p>
                                 </div>
                             {:else}
@@ -414,14 +464,19 @@
                                     class="rounded-2xl border border-violet-400/15 bg-violet-400/[0.07] p-5"
                                 >
                                     <div class="font-semibold text-violet-200">
-                                        Voting hasn't started yet
+                                        {translate(
+                                            $locale,
+                                            "entry.notStartedTitle",
+                                        )}
                                     </div>
 
                                     <p
                                         class="mt-2 text-sm leading-6 text-slate-500"
                                     >
-                                        Come back when the organizer opens the
-                                        event.
+                                        {translate(
+                                            $locale,
+                                            "entry.notStartedDescription",
+                                        )}
                                     </p>
                                 </div>
                             {/if}
@@ -436,7 +491,7 @@
                         <div
                             class="text-xs font-medium uppercase tracking-wider text-slate-600"
                         >
-                            About the event
+                            {translate($locale, "entry.aboutEvent")}
                         </div>
 
                         <p class="mt-2 text-sm leading-6 text-slate-400">
@@ -450,7 +505,9 @@
                         href={`/e/${payload.event.slug}/results`}
                         class="mt-5 flex items-center justify-between rounded-2xl border border-violet-400/15 bg-violet-400/[0.07] px-5 py-4 text-sm font-medium text-violet-200 transition hover:bg-violet-400/10"
                     >
-                        <span>View public results</span>
+                        <span>
+                            {translate($locale, "entry.viewResults")}
+                        </span>
                         <span>→</span>
                     </a>
                 {/if}

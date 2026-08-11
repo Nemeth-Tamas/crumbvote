@@ -1,10 +1,12 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import LanguageSelector from "../components/LanguageSelector.svelte";
     import {
         ApiError,
         getPublicResults,
         type PublicResultsPayload,
     } from "../lib/api";
+    import { locale, translate } from "../lib/i18n";
 
     export let eventSlug: string;
 
@@ -42,28 +44,30 @@
 
     function describeError(error: unknown): string {
         if (!(error instanceof ApiError)) {
-            return "CrumbVote could not reach the server.";
+            return translate($locale, "results.errorDatabase");
         }
 
         switch (error.code) {
             case "public_results_unavailable":
-                return "The organizer has not made results public.";
+                return translate($locale, "results.errorUnavailable");
 
             case "public_entry_not_found":
-                return "This event could not be found.";
+                return translate($locale, "results.errorNotFound");
 
             case "database_error":
-                return "CrumbVote could not load these results.";
+                return translate($locale, "results.errorDatabase");
 
             default:
-                return `The request failed with error "${error.code}".`;
+                return translate($locale, "common.requestFailed", {
+                    code: error.code,
+                });
         }
     }
 </script>
 
 <svelte:head>
     <title>
-        {payload?.event.title ?? "Results"} · CrumbVote
+        {payload?.event.title ?? translate($locale, "results.pageTitle")} · CrumbVote
     </title>
 </svelte:head>
 
@@ -93,7 +97,7 @@
                 <span>CrumbVote</span>
             </a>
 
-            <span class="text-xs text-slate-600"> Public results </span>
+            <LanguageSelector />
         </header>
 
         {#if loading}
@@ -103,7 +107,9 @@
                         class="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-white/10 border-t-violet-400"
                     ></div>
 
-                    <div class="mt-5 font-medium">Loading results…</div>
+                    <div class="mt-5 font-medium">
+                        {translate($locale, "results.loading")}
+                    </div>
                 </div>
             </section>
         {:else if payload === null}
@@ -118,7 +124,7 @@
                     </div>
 
                     <h1 class="mt-5 text-2xl font-semibold">
-                        Results unavailable
+                        {translate($locale, "results.unavailableTitle")}
                     </h1>
 
                     <p class="mt-3 leading-7 text-slate-400">
@@ -129,7 +135,7 @@
                         href="/"
                         class="mt-6 inline-flex rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950"
                     >
-                        Back to CrumbVote
+                        {translate($locale, "common.backToCrumbVote")}
                     </a>
                 </div>
             </section>
@@ -142,8 +148,8 @@
                         class="inline-flex rounded-full border border-violet-400/15 bg-violet-400/10 px-3 py-1.5 text-xs font-medium text-violet-300"
                     >
                         {payload.event.status === "closed"
-                            ? "Final results"
-                            : "Live results"}
+                            ? translate($locale, "results.final")
+                            : translate($locale, "results.live")}
                     </div>
 
                     <h1
@@ -153,17 +159,22 @@
                     </h1>
 
                     <p class="mt-3 text-sm leading-6 text-slate-500">
-                        {payload.total_votes}
-                        {payload.total_votes === 1
-                            ? "current vote"
-                            : "current votes"}
+                        {translate(
+                            $locale,
+                            payload.total_votes === 1
+                                ? "results.currentVoteOne"
+                                : "results.currentVoteMany",
+                            {
+                                count: payload.total_votes,
+                            },
+                        )}
                     </p>
 
                     {#if payload.event.status === "open"}
                         <p
                             class="mt-4 rounded-xl border border-emerald-400/10 bg-emerald-400/[0.06] px-4 py-3 text-sm leading-6 text-emerald-200"
                         >
-                            Voting is still open. These results may change.
+                            {translate($locale, "results.openNotice")}
                         </p>
                     {/if}
                 </div>
@@ -172,7 +183,7 @@
                     <div
                         class="mt-5 rounded-[2rem] border border-dashed border-white/10 px-6 py-14 text-center text-slate-600"
                     >
-                        No entries yet.
+                        {translate($locale, "results.noEntries")}
                     </div>
                 {:else}
                     <div class="mt-5 space-y-4">
@@ -212,7 +223,13 @@
                                         <div
                                             class="text-xs font-medium text-violet-300"
                                         >
-                                            Entry #{entry.number}
+                                            {translate(
+                                                $locale,
+                                                "results.entryNumber",
+                                                {
+                                                    number: entry.number,
+                                                },
+                                            )}
                                         </div>
 
                                         <h2 class="mt-1 text-xl font-semibold">
@@ -234,7 +251,10 @@
                                                 <div
                                                     class="mt-1 text-xs text-slate-600"
                                                 >
-                                                    Votes
+                                                    {translate(
+                                                        $locale,
+                                                        "results.votes",
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -252,7 +272,10 @@
                                                 <div
                                                     class="mt-1 text-xs text-slate-600"
                                                 >
-                                                    Vote share
+                                                    {translate(
+                                                        $locale,
+                                                        "results.voteShare",
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
