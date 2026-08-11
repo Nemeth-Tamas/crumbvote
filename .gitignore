@@ -7,9 +7,14 @@ dist/
 
 # Runtime data
 /data/
+/apps/web/data/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+
+# Browser test artifacts
+/apps/web/playwright-report/
+/apps/web/test-results/
 
 # Environment
 .env

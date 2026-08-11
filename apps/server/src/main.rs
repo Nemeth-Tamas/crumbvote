@@ -12,7 +12,7 @@ use std::{
 };
 use tower_http::services::ServeDir;
 
-const LISTEN_ADDRESS: &str = "0.0.0.0:3000";
+const DEFAULT_LISTEN_ADDRESS: &str = "0.0.0.0:3000";
 
 const DEFAULT_DATABASE_URL: &str = "sqlite://data/crumbvote.sqlite?mode=rwc";
 
@@ -39,6 +39,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     std::fs::create_dir_all(DATA_DIRECTORY)?;
     std::fs::create_dir_all(ENTRY_IMAGE_DIRECTORY)?;
 
+    let listen_address = std::env::var("CRUMBVOTE_LISTEN_ADDRESS")
+        .unwrap_or_else(|_| DEFAULT_LISTEN_ADDRESS.to_owned());
+
     let database_url =
         std::env::var("CRUMBVOTE_DATABASE_URL").unwrap_or_else(|_| DEFAULT_DATABASE_URL.to_owned());
 
@@ -47,9 +50,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let setup_code = if crumbvote_database::admin_is_configured(&database).await? {
         None
     } else {
-        let code = auth::generate_setup_code().map_err(|error| {
-            std::io::Error::other(format!("failed to generate admin setup code: {error}"))
-        })?;
+        let code = if std::env::var_os("PLAYWRIGHT_TEST").is_some() {
+            std::env::var("CRUMBVOTE_E2E_SETUP_CODE").map_err(|_| {
+                std::io::Error::other(
+                    "PLAYWRIGHT_TEST requires \
+                         CRUMBVOTE_E2E_SETUP_CODE",
+                )
+            })?
+        } else {
+            auth::generate_setup_code().map_err(|error| {
+                std::io::Error::other(format!(
+                    "failed to generate admin \
+                             setup code: {error}"
+                ))
+            })?
+        };
 
         println!();
         println!("==========================================");
@@ -83,9 +98,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .nest_service("/media/entries", ServeDir::new(ENTRY_IMAGE_DIRECTORY))
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind(LISTEN_ADDRESS).await?;
+    let listener = tokio::net::TcpListener::bind(&listen_address).await?;
 
-    println!("CrumbVote listening on http://{LISTEN_ADDRESS}");
+    println!("CrumbVote listening on http://{listen_address}");
 
     axum::serve(listener, app).await?;
 
