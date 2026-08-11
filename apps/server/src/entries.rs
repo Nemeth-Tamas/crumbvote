@@ -80,7 +80,11 @@ async fn create_entry(
 ) -> Result<(StatusCode, Json<EntryResponse>), ApiError> {
     require_authenticated(&state, &jar).await?;
 
-    require_event(&state, event_id).await?;
+    let event = require_event(&state, event_id).await?;
+
+    if event.status != "draft" {
+        return Err(api_error(StatusCode::CONFLICT, "event_entries_locked"));
+    }
 
     let name = request.name.trim().to_owned();
 
@@ -104,7 +108,10 @@ async fn create_entry(
     Ok((StatusCode::CREATED, Json(EntryResponse::from(entry))))
 }
 
-async fn require_event(state: &AppState, event_id: i32) -> Result<(), ApiError> {
+async fn require_event(
+    state: &AppState,
+    event_id: i32,
+) -> Result<crumbvote_database::EventModel, ApiError> {
     let event = crumbvote_database::event_by_id(&state.database, event_id)
         .await
         .map_err(|error| {
@@ -113,11 +120,7 @@ async fn require_event(state: &AppState, event_id: i32) -> Result<(), ApiError> 
             api_error(StatusCode::INTERNAL_SERVER_ERROR, "database_error")
         })?;
 
-    if event.is_none() {
-        return Err(api_error(StatusCode::NOT_FOUND, "event_not_found"));
-    }
-
-    Ok(())
+    event.ok_or_else(|| api_error(StatusCode::NOT_FOUND, "event_not_found"))
 }
 
 fn validate_name(name: &str) -> Result<(), ApiError> {

@@ -39,6 +39,21 @@ export type UpdateEventInput = {
     results_public: boolean
 }
 
+export type CrumbEntry = {
+    id: number
+    event_id: number
+    number: number
+    name: string
+    description: string | null
+    created_at: number
+    updated_at: number
+}
+
+export type CreateEntryInput = {
+    name: string
+    description: string | null
+}
+
 export class ApiError extends Error {
     constructor(
         public readonly status: number,
@@ -159,6 +174,27 @@ export function updateAdminEvent(
         `/api/admin/events/${eventId}`,
         {
             method: 'PATCH',
+            body: JSON.stringify(input),
+        },
+    )
+}
+
+export function listAdminEntries(
+    eventId: number,
+): Promise<CrumbEntry[]> {
+    return request<CrumbEntry[]>(
+        `/api/admin/events/${eventId}/entries`,
+    )
+}
+
+export function createAdminEntry(
+    eventId: number,
+    input: CreateEntryInput,
+): Promise<CrumbEntry> {
+    return request<CrumbEntry>(
+        `/api/admin/events/${eventId}/entries`,
+        {
+            method: 'POST',
             body: JSON.stringify(input),
         },
     )

@@ -2,8 +2,11 @@
     import { onMount } from "svelte";
     import {
         ApiError,
+        createAdminEntry,
         getAdminEvent,
+        listAdminEntries,
         updateAdminEvent,
+        type CrumbEntry,
         type CrumbEvent,
         type EventStatus,
     } from "../lib/api";
@@ -23,18 +26,32 @@
     let errorMessage = "";
     let successMessage = "";
 
+    let entries: CrumbEntry[] = [];
+
+    let createEntryOpen = false;
+    let entryName = "";
+    let entryDescription = "";
+    let entryBusy = false;
+    let entryErrorMessage = "";
+
+    let copiedEntryId: number | null = null;
+
     onMount(() => {
-        void loadEvent();
+        void loadWorkspace();
     });
 
-    async function loadEvent() {
+    async function loadWorkspace() {
         loading = true;
         errorMessage = "";
 
         try {
-            const loaded = await getAdminEvent(eventId);
+            const [loadedEvent, loadedEntries] = await Promise.all([
+                getAdminEvent(eventId),
+                listAdminEntries(eventId),
+            ]);
 
-            applyEvent(loaded);
+            applyEvent(loadedEvent);
+            entries = loadedEntries;
         } catch (error) {
             handleError(error);
         } finally {
@@ -90,6 +107,81 @@
         resultsPublic = updated.results_public;
     }
 
+    function openCreateEntry() {
+        entryName = "";
+        entryDescription = "";
+        entryErrorMessage = "";
+        createEntryOpen = true;
+    }
+
+    function closeCreateEntry() {
+        createEntryOpen = false;
+        entryName = "";
+        entryDescription = "";
+        entryErrorMessage = "";
+    }
+
+    async function handleCreateEntry(submitEvent: SubmitEvent) {
+        submitEvent.preventDefault();
+
+        if (event === null) {
+            return;
+        }
+
+        entryBusy = true;
+        entryErrorMessage = "";
+
+        try {
+            const created = await createAdminEntry(event.id, {
+                name: entryName.trim(),
+                description: entryDescription.trim() || null,
+            });
+
+            entries = [...entries, created];
+
+            closeCreateEntry();
+        } catch (error) {
+            if (
+                error instanceof ApiError &&
+                error.code === "authentication_required"
+            ) {
+                closeCreateEntry();
+                onSessionExpired();
+                return;
+            }
+
+            entryErrorMessage = describeError(error);
+        } finally {
+            entryBusy = false;
+        }
+    }
+
+    function entryUrl(entry: CrumbEntry): string {
+        if (event === null) {
+            return "";
+        }
+
+        return `/e/${event.slug}/${entry.id}`;
+    }
+
+    async function copyEntryUrl(entry: CrumbEntry) {
+        const url = `${window.location.origin}${entryUrl(entry)}`;
+
+        try {
+            await navigator.clipboard.writeText(url);
+
+            copiedEntryId = entry.id;
+
+            window.setTimeout(() => {
+                if (copiedEntryId === entry.id) {
+                    copiedEntryId = null;
+                }
+            }, 1500);
+        } catch {
+            entryErrorMessage = "The voting link could not be copied.";
+        }
+    }
+
     function handleError(error: unknown) {
         if (
             error instanceof ApiError &&
@@ -123,6 +215,15 @@
                 "That event status transition is not allowed.",
 
             database_error: "CrumbVote could not access its database.",
+
+            entry_name_required: "Give the entry a name.",
+
+            entry_name_too_long: "The entry name is too long.",
+
+            entry_description_too_long: "The entry description is too long.",
+
+            event_entries_locked:
+                "Entries are locked after voting has been opened.",
         };
 
         return (
@@ -427,19 +528,26 @@
                 >
                     <div class="text-sm text-slate-500">Entries</div>
 
-                    <div class="mt-3 text-3xl font-semibold">0</div>
+                    <div class="mt-3 text-3xl font-semibold">
+                        {entries.length}
+                    </div>
 
                     <p class="mt-2 text-sm leading-6 text-slate-500">
-                        Contestants and their individual voting links are coming
-                        next.
+                        {#if event.status === "draft"}
+                            Add contestants before opening voting.
+                        {:else}
+                            The contestant list is locked while the event is or
+                            has been live.
+                        {/if}
                     </p>
 
                     <button
                         type="button"
-                        disabled
-                        class="mt-5 w-full cursor-not-allowed rounded-xl border border-white/5 bg-white/[0.03] px-4 py-2.5 text-sm text-slate-600"
+                        disabled={event.status !== "draft"}
+                        onclick={openCreateEntry}
+                        class="mt-5 w-full rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-none disabled:bg-white/[0.03] disabled:text-slate-600"
                     >
-                        Add entry · M3
+                        + Add entry
                     </button>
                 </article>
 
@@ -454,5 +562,222 @@
                 </article>
             </div>
         </div>
+
+        <div
+            class="mt-6 rounded-[2rem] border border-white/10 bg-white/[0.025] p-6 sm:p-8"
+        >
+            <div
+                class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+                <div>
+                    <h2 class="text-xl font-semibold">Entries</h2>
+
+                    <p class="mt-1 text-sm text-slate-500">
+                        Contestants and their stable voting links.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    disabled={event.status !== "draft"}
+                    onclick={openCreateEntry}
+                    class="w-fit rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                    + Add entry
+                </button>
+            </div>
+
+            {#if entries.length === 0}
+                <div
+                    class="mt-6 rounded-3xl border border-dashed border-white/10 px-6 py-12 text-center"
+                >
+                    <div
+                        class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-xl"
+                    >
+                        #
+                    </div>
+
+                    <h3 class="mt-4 font-semibold">No entries yet</h3>
+
+                    <p
+                        class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500"
+                    >
+                        Add the cakes or contestants that visitors will be able
+                        to vote for.
+                    </p>
+                </div>
+            {:else}
+                <div class="mt-6 grid gap-4 lg:grid-cols-2">
+                    {#each entries as entry (entry.id)}
+                        <article
+                            class="rounded-3xl border border-white/10 bg-slate-950/40 p-5"
+                        >
+                            <div class="flex items-start gap-4">
+                                <div
+                                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-400/10 font-mono font-semibold text-violet-300"
+                                >
+                                    #{entry.number}
+                                </div>
+
+                                <div class="min-w-0 flex-1">
+                                    <h3
+                                        class="truncate font-semibold text-white"
+                                    >
+                                        {entry.name}
+                                    </h3>
+
+                                    <p
+                                        class="mt-2 min-h-10 text-sm leading-5 text-slate-500"
+                                    >
+                                        {entry.description ?? "No description."}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 border-t border-white/5 pt-4">
+                                <div class="text-xs font-medium text-slate-500">
+                                    Voting link
+                                </div>
+
+                                <div class="mt-2 flex items-center gap-2">
+                                    <div
+                                        class="min-w-0 flex-1 truncate rounded-xl bg-black/20 px-3 py-2.5 font-mono text-xs text-slate-500"
+                                    >
+                                        {entryUrl(entry)}
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onclick={() => void copyEntryUrl(entry)}
+                                        class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
+                                    >
+                                        {copiedEntryId === entry.id
+                                            ? "Copied"
+                                            : "Copy"}
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    {/each}
+                </div>
+            {/if}
+        </div>
     </section>
+
+    {#if createEntryOpen}
+        <div
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+        >
+            <button
+                type="button"
+                aria-label="Close add entry dialog"
+                disabled={entryBusy}
+                onclick={closeCreateEntry}
+                class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+            ></button>
+
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="create-entry-title"
+                class="relative z-10 w-full max-w-xl rounded-[2rem] border border-white/10 bg-slate-900 p-6 shadow-2xl shadow-black/50 sm:p-8"
+            >
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <div
+                            class="mb-3 inline-flex rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-xs font-medium text-violet-300"
+                        >
+                            New contestant
+                        </div>
+
+                        <h2
+                            id="create-entry-title"
+                            class="text-2xl font-semibold tracking-tight"
+                        >
+                            Add entry
+                        </h2>
+
+                        <p class="mt-2 leading-6 text-slate-400">
+                            The entry number and permanent voting link are
+                            assigned automatically.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        aria-label="Close"
+                        disabled={entryBusy}
+                        onclick={closeCreateEntry}
+                        class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-400 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <form class="mt-7 space-y-5" onsubmit={handleCreateEntry}>
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-300">
+                            Entry name
+                        </span>
+
+                        <input
+                            bind:value={entryName}
+                            type="text"
+                            maxlength="120"
+                            placeholder="Málnás csokitorta"
+                            required
+                            class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3.5 text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-4 focus:ring-violet-400/10"
+                        />
+                    </label>
+
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-300">
+                            Description
+                        </span>
+
+                        <textarea
+                            bind:value={entryDescription}
+                            maxlength="2000"
+                            rows="4"
+                            placeholder="Optional description…"
+                            class="mt-2 w-full resize-none rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3.5 text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-4 focus:ring-violet-400/10"
+                        ></textarea>
+
+                        <div class="mt-2 text-right text-xs text-slate-600">
+                            {entryDescription.length} / 2000
+                        </div>
+                    </label>
+
+                    {#if entryErrorMessage}
+                        <div
+                            class="rounded-xl border border-red-400/15 bg-red-400/10 px-4 py-3 text-sm leading-6 text-red-200"
+                        >
+                            {entryErrorMessage}
+                        </div>
+                    {/if}
+
+                    <div
+                        class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end"
+                    >
+                        <button
+                            type="button"
+                            disabled={entryBusy}
+                            onclick={closeCreateEntry}
+                            class="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            disabled={entryBusy}
+                            class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {entryBusy ? "Adding…" : "Add entry"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {/if}
 {/if}
