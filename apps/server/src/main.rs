@@ -1,7 +1,13 @@
+mod admin;
+mod auth;
+
 use axum::{Json, Router, extract::State, http::StatusCode, routing::get};
 use crumbvote_database::DatabaseConnection;
 use serde::Serialize;
-use std::error::Error;
+use std::{
+    error::Error,
+    sync::{Arc, Mutex},
+};
 
 const LISTEN_ADDRESS: &str = "0.0.0.0:3000";
 
@@ -10,8 +16,9 @@ const DEFAULT_DATABASE_URL: &str = "sqlite://data/crumbvote.sqlite?mode=rwc";
 const DATA_DIRECTORY: &str = "data";
 
 #[derive(Clone)]
-struct AppState {
-    database: DatabaseConnection,
+pub(crate) struct AppState {
+    pub(crate) database: DatabaseConnection,
+    pub(crate) setup_code: Arc<Mutex<Option<String>>>,
 }
 
 #[derive(Serialize)]
@@ -30,10 +37,34 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let database = crumbvote_database::connect(&database_url).await?;
 
-    let state = AppState { database };
+    let setup_code = if crumbvote_database::admin_is_configured(&database).await? {
+        None
+    } else {
+        let code = auth::generate_setup_code().map_err(|error| {
+            std::io::Error::other(format!("failed to generate admin setup code: {error}"))
+        })?;
+
+        println!();
+        println!("==========================================");
+        println!(" CrumbVote first-time setup required");
+        println!();
+        println!(" Admin setup code: {code}");
+        println!();
+        println!(" Open /admin to configure CrumbVote.");
+        println!("==========================================");
+        println!();
+
+        Some(code)
+    };
+
+    let state = AppState {
+        database,
+        setup_code: Arc::new(Mutex::new(setup_code)),
+    };
 
     let app = Router::new()
         .route("/health", get(health))
+        .nest("/api/admin", admin::router())
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(LISTEN_ADDRESS).await?;
