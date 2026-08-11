@@ -6,6 +6,7 @@
         ensurePublicVoter,
         getPublicEntry,
         getPublicVote,
+        trackPublicScan,
         type PublicEntryPayload,
     } from "../lib/api";
 
@@ -40,6 +41,12 @@
             const token = await ensureVoterIdentity();
 
             const vote = await getPublicVote(eventSlug, token);
+
+            try {
+                await trackPublicScan(eventSlug, loaded.entry.id, token);
+            } catch (error) {
+                console.warn("Failed to track public entry scan:", error);
+            }
 
             payload = loaded;
             voterToken = token;

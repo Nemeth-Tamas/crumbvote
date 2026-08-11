@@ -502,9 +502,26 @@ test(
             ),
         ).toBeDisabled()
 
+        const firstScan =
+            page.waitForResponse(
+                (response) =>
+                    response
+                        .url()
+                        .endsWith(
+                            '/api/public/events/e2e-cake-show/entries/1/scan',
+                        ) &&
+                    response
+                        .request()
+                        .method() === 'POST',
+            )
+
         await page.goto(
             '/e/e2e-cake-show/1',
         )
+
+        expect(
+            (await firstScan).ok(),
+        ).toBeTruthy()
 
         await expect(
             page.getByRole(

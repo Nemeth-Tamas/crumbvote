@@ -5,6 +5,7 @@ mod m20260811_000002_create_events;
 mod m20260811_000003_create_entries;
 mod m20260811_000004_add_entry_images;
 mod m20260811_000005_create_votes;
+mod m20260811_000006_create_activity_events;
 
 pub struct Migrator;
 
@@ -17,6 +18,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260811_000003_create_entries::Migration),
             Box::new(m20260811_000004_add_entry_images::Migration),
             Box::new(m20260811_000005_create_votes::Migration),
+            Box::new(m20260811_000006_create_activity_events::Migration),
         ]
     }
 }

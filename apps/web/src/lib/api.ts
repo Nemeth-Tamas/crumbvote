@@ -89,6 +89,10 @@ export type PublicVote = {
     entry_id: number | null
 }
 
+export type PublicScan = {
+    tracked: boolean
+}
+
 export class ApiError extends Error {
     constructor(
         public readonly status: number,
@@ -323,6 +327,23 @@ export function castPublicVote(
             body: JSON.stringify({
                 entry_id: entryId,
             }),
+        },
+    )
+}
+
+export function trackPublicScan(
+    eventSlug: string,
+    entryId: number,
+    voterToken: string,
+): Promise<PublicScan> {
+    return request<PublicScan>(
+        `/api/public/events/${eventSlug}/entries/${entryId}/scan`,
+        {
+            method: 'POST',
+            headers: {
+                'X-CrumbVote-Voter':
+                    voterToken,
+            },
         },
     )
 }

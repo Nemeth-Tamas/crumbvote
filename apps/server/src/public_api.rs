@@ -64,10 +64,19 @@ struct VoteResponse {
     entry_id: Option<i32>,
 }
 
+#[derive(Serialize)]
+struct ScanResponse {
+    tracked: bool,
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/voter", post(ensure_voter))
         .route("/events/{slug}/entries/{entry_id}", get(get_public_entry))
+        .route(
+            "/events/{slug}/entries/{entry_id}/scan",
+            post(track_entry_scan),
+        )
         .route("/events/{slug}/vote", get(get_current_vote).post(cast_vote))
 }
 
@@ -124,6 +133,39 @@ async fn get_public_entry(
             image_url,
         },
     }))
+}
+
+async fn track_entry_scan(
+    State(state): State<AppState>,
+    Path((slug, entry_id)): Path<(String, i32)>,
+    headers: HeaderMap,
+) -> Result<Json<ScanResponse>, ApiError> {
+    let event = require_public_event(&state, &slug).await?;
+
+    let entry = require_public_entry(&state, event.id, entry_id).await?;
+
+    let voter_token = voter_token_from_headers(&headers)?;
+
+    let voter_hash = auth::hash_token(&voter_token);
+
+    crumbvote_database::record_activity(
+        &state.database,
+        event.id,
+        entry.id,
+        voter_hash,
+        "scan".to_owned(),
+    )
+    .await
+    .map_err(|error| {
+        eprintln!("Failed to record entry scan: {error}");
+
+        api_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "activity_tracking_failed",
+        )
+    })?;
+
+    Ok(Json(ScanResponse { tracked: true }))
 }
 
 async fn ensure_voter(
@@ -197,13 +239,43 @@ async fn cast_vote(
 
     let voter_hash = auth::hash_token(&voter_token);
 
-    let vote = crumbvote_database::set_vote(&state.database, event.id, voter_hash, entry.id)
+    let previous_vote = crumbvote_database::current_vote(&state.database, event.id, &voter_hash)
         .await
         .map_err(|error| {
-            eprintln!("Failed to persist vote: {error}");
+            eprintln!("Failed to load vote before update: {error}");
 
             api_error(StatusCode::INTERNAL_SERVER_ERROR, "database_error")
         })?;
+
+    let activity_kind = match previous_vote.as_ref() {
+        None => Some("vote"),
+
+        Some(previous) if previous.entry_id != entry.id => Some("vote_change"),
+
+        Some(_) => None,
+    };
+
+    let vote =
+        crumbvote_database::set_vote(&state.database, event.id, voter_hash.clone(), entry.id)
+            .await
+            .map_err(|error| {
+                eprintln!("Failed to persist vote: {error}");
+
+                api_error(StatusCode::INTERNAL_SERVER_ERROR, "database_error")
+            })?;
+
+    if let Some(kind) = activity_kind
+        && let Err(error) = crumbvote_database::record_activity(
+            &state.database,
+            event.id,
+            entry.id,
+            voter_hash,
+            kind.to_owned(),
+        )
+        .await
+    {
+        eprintln!("Failed to record vote activity: {error}");
+    }
 
     Ok(Json(VoteResponse {
         entry_id: Some(vote.entry_id),

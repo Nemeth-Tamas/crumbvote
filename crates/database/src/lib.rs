@@ -375,6 +375,29 @@ pub async fn set_vote(
     .await
 }
 
+pub use entity::activity_event::Model as ActivityEventModel;
+
+pub async fn record_activity(
+    database: &DatabaseConnection,
+    event_id: i32,
+    entry_id: i32,
+    voter_hash: String,
+    kind: String,
+) -> Result<ActivityEventModel, DbErr> {
+    let now = unix_timestamp()?;
+
+    entity::activity_event::ActiveModel {
+        id: NotSet,
+        event_id: Set(event_id),
+        entry_id: Set(entry_id),
+        voter_hash: Set(voter_hash),
+        kind: Set(kind),
+        created_at: Set(now),
+    }
+    .insert(database)
+    .await
+}
+
 fn unix_timestamp() -> Result<i64, DbErr> {
     let seconds = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -431,6 +454,13 @@ mod tests {
                 .has_table("votes")
                 .await
                 .expect("votes schema check should succeed")
+        );
+
+        assert!(
+            schema
+                .has_table("activity_events")
+                .await
+                .expect("activity_events schema check should succeed",)
         );
 
         assert!(
@@ -602,6 +632,44 @@ mod tests {
             .expect("vote should exist");
 
         assert_eq!(current.entry_id, second_entry.id);
+
+        let scan_activity = record_activity(
+            &database,
+            event.id,
+            first_entry.id,
+            voter_hash.to_owned(),
+            "scan".to_owned(),
+        )
+        .await
+        .expect("scan activity should record");
+
+        assert_eq!(scan_activity.kind, "scan");
+
+        assert_eq!(scan_activity.entry_id, first_entry.id);
+
+        let vote_activity = record_activity(
+            &database,
+            event.id,
+            first_entry.id,
+            voter_hash.to_owned(),
+            "vote".to_owned(),
+        )
+        .await
+        .expect("vote activity should record");
+
+        assert_eq!(vote_activity.kind, "vote");
+
+        let change_activity = record_activity(
+            &database,
+            event.id,
+            second_entry.id,
+            voter_hash.to_owned(),
+            "vote_change".to_owned(),
+        )
+        .await
+        .expect("vote change activity should record");
+
+        assert_eq!(change_activity.kind, "vote_change");
 
         let updated = update_event(
             &database,
