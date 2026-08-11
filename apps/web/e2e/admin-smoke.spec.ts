@@ -36,7 +36,6 @@ test(
         await page
             .getByLabel(
                 'Administrator password',
-                { exact: true },
             )
             .fill(PASSWORD)
 
@@ -93,7 +92,6 @@ test(
         await createEventDialog
             .getByLabel(
                 'Description',
-                { exact: true },
             )
             .fill(
                 'A cake show created by our tiny robot.',
@@ -168,7 +166,6 @@ test(
         await addEntryDialog
             .getByLabel(
                 'Description',
-                { exact: true },
             )
             .fill(
                 'Raspberry science, automated.',
@@ -361,7 +358,6 @@ test(
         await page
             .getByLabel(
                 'Administrator password',
-                { exact: true },
             )
             .fill(PASSWORD)
 
