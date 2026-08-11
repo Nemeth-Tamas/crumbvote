@@ -61,7 +61,6 @@ pub fn generate_setup_code() -> Result<String, getrandom::Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use argon2::password_hash::{PasswordHash, PasswordVerifier};
 
     #[test]
     fn password_hash_round_trip() {
