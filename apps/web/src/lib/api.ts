@@ -10,12 +10,17 @@ export type SetupResult = {
     configured: boolean
 }
 
+export type EventStatus =
+    | 'draft'
+    | 'open'
+    | 'closed'
+
 export type CrumbEvent = {
     id: number
     slug: string
     title: string
     description: string | null
-    status: string
+    status: EventStatus
     results_public: boolean
     created_at: number
     updated_at: number
@@ -25,6 +30,13 @@ export type CreateEventInput = {
     title: string
     slug: string
     description: string | null
+}
+
+export type UpdateEventInput = {
+    title: string
+    description: string | null
+    status: EventStatus
+    results_public: boolean
 }
 
 export class ApiError extends Error {
@@ -129,4 +141,25 @@ export function createAdminEvent(
         method: 'POST',
         body: JSON.stringify(input),
     })
+}
+
+export function getAdminEvent(
+    eventId: number,
+): Promise<CrumbEvent> {
+    return request<CrumbEvent>(
+        `/api/admin/events/${eventId}`,
+    )
+}
+
+export function updateAdminEvent(
+    eventId: number,
+    input: UpdateEventInput,
+): Promise<CrumbEvent> {
+    return request<CrumbEvent>(
+        `/api/admin/events/${eventId}`,
+        {
+            method: 'PATCH',
+            body: JSON.stringify(input),
+        },
+    )
 }

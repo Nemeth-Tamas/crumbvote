@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import EventWorkspace from "./EventWorkspace.svelte";
     import {
         ApiError,
         createAdminEvent,
@@ -12,7 +13,9 @@
         type CrumbEvent,
     } from "../lib/api";
 
-    type View = "loading" | "setup" | "login" | "dashboard" | "error";
+    export let initialEventId: number | null = null;
+
+    type View = "loading" | "setup" | "login" | "dashboard" | "event" | "error";
 
     let view: View = "loading";
 
@@ -53,8 +56,7 @@
             const session = await getAdminSession();
 
             if (session.authenticated) {
-                await loadEvents();
-                view = "dashboard";
+                await showAuthenticatedDestination();
             } else {
                 view = "login";
             }
@@ -82,9 +84,7 @@
 
             clearSensitiveFields();
 
-            await loadEvents();
-
-            view = "dashboard";
+            await showAuthenticatedDestination();
         } catch (error) {
             errorMessage = describeError(error);
         } finally {
@@ -130,6 +130,16 @@
         } finally {
             busy = false;
         }
+    }
+
+    async function showAuthenticatedDestination() {
+        if (initialEventId !== null) {
+            view = "event";
+            return;
+        }
+
+        await loadEvents();
+        view = "dashboard";
     }
 
     async function loadEvents() {
@@ -219,6 +229,12 @@
         } finally {
             eventBusy = false;
         }
+    }
+
+    function handleWorkspaceSessionExpired() {
+        clearSensitiveFields();
+        events = [];
+        view = "login";
     }
 
     function clearSensitiveFields() {
@@ -547,19 +563,23 @@
                                         </span>
                                     </div>
 
-                                    <button
-                                        type="button"
-                                        disabled
-                                        class="mt-5 w-full cursor-not-allowed rounded-xl border border-white/5 bg-white/[0.03] px-4 py-2.5 text-sm text-slate-600"
+                                    <a
+                                        href={`/admin/events/${event.id}`}
+                                        class="mt-5 block w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-center text-sm font-medium text-slate-300 transition hover:border-violet-400/30 hover:bg-violet-400/10 hover:text-white"
                                     >
-                                        Manage event · next slice
-                                    </button>
+                                        Manage event →
+                                    </a>
                                 </article>
                             {/each}
                         </div>
                     </div>
                 {/if}
             </section>
+        {:else if view === "event" && initialEventId !== null}
+            <EventWorkspace
+                eventId={initialEventId}
+                onSessionExpired={handleWorkspaceSessionExpired}
+            />
         {:else}
             <section class="flex flex-1 items-center justify-center py-12">
                 <div class="w-full max-w-md">
