@@ -5,7 +5,9 @@
         createAdminEntry,
         getAdminEvent,
         listAdminEntries,
+        updateAdminEntry,
         updateAdminEvent,
+        uploadAdminEntryImage,
         type CrumbEntry,
         type CrumbEvent,
         type EventStatus,
@@ -35,6 +37,15 @@
     let entryErrorMessage = "";
 
     let copiedEntryId: number | null = null;
+
+    let editEntryOpen = false;
+    let editingEntry: CrumbEntry | null = null;
+    let editEntryName = "";
+    let editEntryDescription = "";
+    let editEntryImageFile: File | null = null;
+    let editEntryImagePreviewUrl: string | null = null;
+    let editEntryBusy = false;
+    let editEntryErrorMessage = "";
 
     onMount(() => {
         void loadWorkspace();
@@ -156,6 +167,120 @@
         }
     }
 
+    function openEditEntry(entry: CrumbEntry) {
+        clearEditEntryImage();
+
+        editingEntry = entry;
+        editEntryName = entry.name;
+        editEntryDescription = entry.description ?? "";
+        editEntryErrorMessage = "";
+        editEntryOpen = true;
+    }
+
+    function closeEditEntry() {
+        clearEditEntryImage();
+
+        editEntryOpen = false;
+        editingEntry = null;
+        editEntryName = "";
+        editEntryDescription = "";
+        editEntryErrorMessage = "";
+    }
+
+    function clearEditEntryImage() {
+        if (editEntryImagePreviewUrl !== null) {
+            URL.revokeObjectURL(editEntryImagePreviewUrl);
+        }
+
+        editEntryImageFile = null;
+        editEntryImagePreviewUrl = null;
+    }
+
+    function handleEditEntryImageChange(inputEvent: Event) {
+        const input = inputEvent.currentTarget as HTMLInputElement;
+
+        const file = input.files?.[0] ?? null;
+
+        selectEditEntryImage(file);
+
+        input.value = "";
+    }
+
+    function selectEditEntryImage(file: File | null) {
+        if (file === null) {
+            return;
+        }
+
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+            editEntryErrorMessage = "Choose a JPEG, PNG or WebP image.";
+            return;
+        }
+
+        if (file.size > 8 * 1024 * 1024) {
+            editEntryErrorMessage = "The image must be 8 MiB or smaller.";
+            return;
+        }
+
+        clearEditEntryImage();
+
+        editEntryImageFile = file;
+        editEntryImagePreviewUrl = URL.createObjectURL(file);
+        editEntryErrorMessage = "";
+    }
+
+    async function handleEditEntry(submitEvent: SubmitEvent) {
+        submitEvent.preventDefault();
+
+        if (event === null || editingEntry === null) {
+            return;
+        }
+
+        editEntryBusy = true;
+        editEntryErrorMessage = "";
+
+        try {
+            let updated = await updateAdminEntry(event.id, editingEntry.id, {
+                name: editEntryName.trim(),
+                description: editEntryDescription.trim() || null,
+            });
+
+            entries = entries.map((entry) =>
+                entry.id === updated.id ? updated : entry,
+            );
+
+            editingEntry = updated;
+
+            if (editEntryImageFile !== null) {
+                updated = await uploadAdminEntryImage(
+                    event.id,
+                    updated.id,
+                    editEntryImageFile,
+                );
+
+                entries = entries.map((entry) =>
+                    entry.id === updated.id ? updated : entry,
+                );
+
+                editingEntry = updated;
+            }
+
+            closeEditEntry();
+        } catch (error) {
+            if (
+                error instanceof ApiError &&
+                error.code === "authentication_required"
+            ) {
+                closeEditEntry();
+                onSessionExpired();
+                return;
+            }
+
+            editEntryErrorMessage = describeError(error);
+        } finally {
+            editEntryBusy = false;
+        }
+    }
+
     function entryUrl(entry: CrumbEntry): string {
         if (event === null) {
             return "";
@@ -224,6 +349,23 @@
 
             event_entries_locked:
                 "Entries are locked after voting has been opened.",
+
+            entry_not_found: "That entry no longer exists.",
+
+            unsupported_image_type: "Choose a JPEG, PNG or WebP image.",
+
+            image_too_large: "The image must be 8 MiB or smaller.",
+
+            image_empty: "The selected image is empty.",
+
+            image_required: "Choose an image to upload.",
+
+            invalid_image_upload: "CrumbVote could not read that image upload.",
+
+            invalid_image_data:
+                "The uploaded file does not appear to be a valid image.",
+
+            image_storage_error: "CrumbVote could not store the image.",
         };
 
         return (
@@ -610,51 +752,98 @@
                 <div class="mt-6 grid gap-4 lg:grid-cols-2">
                     {#each entries as entry (entry.id)}
                         <article
-                            class="rounded-3xl border border-white/10 bg-slate-950/40 p-5"
+                            class="overflow-hidden rounded-3xl border border-white/10 bg-slate-950/40"
                         >
-                            <div class="flex items-start gap-4">
+                            <div
+                                class="relative aspect-[16/9] overflow-hidden bg-black/20"
+                            >
+                                {#if entry.image_url !== null}
+                                    <img
+                                        src={entry.image_url}
+                                        alt={entry.name}
+                                        class="h-full w-full object-cover"
+                                    />
+                                {:else}
+                                    <div
+                                        class="flex h-full items-center justify-center"
+                                    >
+                                        <div class="text-center">
+                                            <div
+                                                class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 text-2xl text-slate-600"
+                                            >
+                                                ◇
+                                            </div>
+
+                                            <div
+                                                class="mt-3 text-xs text-slate-600"
+                                            >
+                                                No image
+                                            </div>
+                                        </div>
+                                    </div>
+                                {/if}
+
                                 <div
-                                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-400/10 font-mono font-semibold text-violet-300"
+                                    class="absolute left-4 top-4 rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2 font-mono text-sm font-semibold text-white backdrop-blur"
                                 >
                                     #{entry.number}
                                 </div>
-
-                                <div class="min-w-0 flex-1">
-                                    <h3
-                                        class="truncate font-semibold text-white"
-                                    >
-                                        {entry.name}
-                                    </h3>
-
-                                    <p
-                                        class="mt-2 min-h-10 text-sm leading-5 text-slate-500"
-                                    >
-                                        {entry.description ?? "No description."}
-                                    </p>
-                                </div>
                             </div>
 
-                            <div class="mt-5 border-t border-white/5 pt-4">
-                                <div class="text-xs font-medium text-slate-500">
-                                    Voting link
-                                </div>
+                            <div class="p-5">
+                                <div
+                                    class="flex items-start justify-between gap-4"
+                                >
+                                    <div class="min-w-0 flex-1">
+                                        <h3
+                                            class="truncate font-semibold text-white"
+                                        >
+                                            {entry.name}
+                                        </h3>
 
-                                <div class="mt-2 flex items-center gap-2">
-                                    <div
-                                        class="min-w-0 flex-1 truncate rounded-xl bg-black/20 px-3 py-2.5 font-mono text-xs text-slate-500"
-                                    >
-                                        {entryUrl(entry)}
+                                        <p
+                                            class="mt-2 min-h-10 text-sm leading-5 text-slate-500"
+                                        >
+                                            {entry.description ??
+                                                "No description."}
+                                        </p>
                                     </div>
 
                                     <button
                                         type="button"
-                                        onclick={() => void copyEntryUrl(entry)}
-                                        class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
+                                        disabled={event.status !== "draft"}
+                                        onclick={() => openEditEntry(entry)}
+                                        class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-violet-400/30 hover:bg-violet-400/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
                                     >
-                                        {copiedEntryId === entry.id
-                                            ? "Copied"
-                                            : "Copy"}
+                                        Edit
                                     </button>
+                                </div>
+
+                                <div class="mt-5 border-t border-white/5 pt-4">
+                                    <div
+                                        class="text-xs font-medium text-slate-500"
+                                    >
+                                        Voting link
+                                    </div>
+
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <div
+                                            class="min-w-0 flex-1 truncate rounded-xl bg-black/20 px-3 py-2.5 font-mono text-xs text-slate-500"
+                                        >
+                                            {entryUrl(entry)}
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onclick={() =>
+                                                void copyEntryUrl(entry)}
+                                            class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
+                                        >
+                                            {copiedEntryId === entry.id
+                                                ? "Copied"
+                                                : "Copy"}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </article>
@@ -774,6 +963,203 @@
                             class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {entryBusy ? "Adding…" : "Add entry"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {/if}
+
+    {#if editEntryOpen && editingEntry !== null}
+        <div
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+        >
+            <button
+                type="button"
+                aria-label="Close edit entry dialog"
+                disabled={editEntryBusy}
+                onclick={closeEditEntry}
+                class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+            ></button>
+
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="edit-entry-title"
+                class="relative z-10 max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-[2rem] border border-white/10 bg-slate-900 p-6 shadow-2xl shadow-black/50 sm:p-8"
+            >
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <div
+                            class="mb-3 inline-flex rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-xs font-medium text-violet-300"
+                        >
+                            Entry #{editingEntry.number}
+                        </div>
+
+                        <h2
+                            id="edit-entry-title"
+                            class="text-2xl font-semibold tracking-tight"
+                        >
+                            Edit entry
+                        </h2>
+
+                        <p class="mt-2 leading-6 text-slate-400">
+                            Update contestant details and its public image.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        aria-label="Close"
+                        disabled={editEntryBusy}
+                        onclick={closeEditEntry}
+                        class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-400 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <form class="mt-7 space-y-5" onsubmit={handleEditEntry}>
+                    <div>
+                        <span class="text-sm font-medium text-slate-300">
+                            Entry image
+                        </span>
+
+                        <div
+                            class="mt-2 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/50"
+                        >
+                            <div class="aspect-[16/9] bg-black/20">
+                                {#if editEntryImagePreviewUrl !== null}
+                                    <img
+                                        src={editEntryImagePreviewUrl}
+                                        alt="Selected preview"
+                                        class="h-full w-full object-cover"
+                                    />
+                                {:else if editingEntry.image_url !== null}
+                                    <img
+                                        src={editingEntry.image_url}
+                                        alt={editingEntry.name}
+                                        class="h-full w-full object-cover"
+                                    />
+                                {:else}
+                                    <div
+                                        class="flex h-full items-center justify-center text-sm text-slate-600"
+                                    >
+                                        No image yet
+                                    </div>
+                                {/if}
+                            </div>
+
+                            <label
+                                class="flex cursor-pointer items-center justify-between gap-4 border-t border-white/10 px-4 py-3 transition hover:bg-white/[0.03]"
+                            >
+                                <div>
+                                    <div
+                                        class="text-sm font-medium text-slate-300"
+                                    >
+                                        {editingEntry.image_url !== null
+                                            ? "Replace image"
+                                            : "Choose image"}
+                                    </div>
+
+                                    <div class="mt-1 text-xs text-slate-600">
+                                        JPEG, PNG or WebP · max 8 MiB
+                                    </div>
+                                </div>
+
+                                <span
+                                    class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-slate-300"
+                                >
+                                    Browse
+                                </span>
+
+                                <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    disabled={editEntryBusy}
+                                    onchange={handleEditEntryImageChange}
+                                    class="sr-only"
+                                />
+                            </label>
+                        </div>
+
+                        {#if editEntryImageFile !== null}
+                            <div class="mt-2 text-xs text-slate-500">
+                                Selected:
+                                {editEntryImageFile.name}
+                            </div>
+                        {/if}
+                    </div>
+
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-300">
+                            Entry name
+                        </span>
+
+                        <input
+                            bind:value={editEntryName}
+                            type="text"
+                            maxlength="120"
+                            required
+                            class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3.5 text-white outline-none transition focus:border-violet-400/50 focus:ring-4 focus:ring-violet-400/10"
+                        />
+                    </label>
+
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-300">
+                            Description
+                        </span>
+
+                        <textarea
+                            bind:value={editEntryDescription}
+                            maxlength="2000"
+                            rows="4"
+                            class="mt-2 w-full resize-none rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3.5 text-white outline-none transition focus:border-violet-400/50 focus:ring-4 focus:ring-violet-400/10"
+                        ></textarea>
+
+                        <div class="mt-2 text-right text-xs text-slate-600">
+                            {editEntryDescription.length} / 2000
+                        </div>
+                    </label>
+
+                    <div>
+                        <span class="text-sm font-medium text-slate-300">
+                            Permanent voting link
+                        </span>
+
+                        <div
+                            class="mt-2 rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 font-mono text-xs text-slate-500"
+                        >
+                            {entryUrl(editingEntry)}
+                        </div>
+                    </div>
+
+                    {#if editEntryErrorMessage}
+                        <div
+                            class="rounded-xl border border-red-400/15 bg-red-400/10 px-4 py-3 text-sm leading-6 text-red-200"
+                        >
+                            {editEntryErrorMessage}
+                        </div>
+                    {/if}
+
+                    <div
+                        class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end"
+                    >
+                        <button
+                            type="button"
+                            disabled={editEntryBusy}
+                            onclick={closeEditEntry}
+                            class="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            disabled={editEntryBusy}
+                            class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {editEntryBusy ? "Saving…" : "Save entry"}
                         </button>
                     </div>
                 </form>

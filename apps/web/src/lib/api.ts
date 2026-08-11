@@ -45,11 +45,17 @@ export type CrumbEntry = {
     number: number
     name: string
     description: string | null
+    image_url: string | null
     created_at: number
     updated_at: number
 }
 
 export type CreateEntryInput = {
+    name: string
+    description: string | null
+}
+
+export type UpdateEntryInput = {
     name: string
     description: string | null
 }
@@ -70,7 +76,11 @@ async function request<T>(
 ): Promise<T> {
     const headers = new Headers(init.headers)
 
-    if (init.body !== undefined && !headers.has('Content-Type')) {
+    if (
+        init.body !== undefined &&
+        !(init.body instanceof FormData) &&
+        !headers.has('Content-Type')
+    ) {
         headers.set('Content-Type', 'application/json')
     }
 
@@ -196,6 +206,38 @@ export function createAdminEntry(
         {
             method: 'POST',
             body: JSON.stringify(input),
+        },
+    )
+}
+
+export function updateAdminEntry(
+    eventId: number,
+    entryId: number,
+    input: UpdateEntryInput,
+): Promise<CrumbEntry> {
+    return request<CrumbEntry>(
+        `/api/admin/events/${eventId}/entries/${entryId}`,
+        {
+            method: 'PATCH',
+            body: JSON.stringify(input),
+        },
+    )
+}
+
+export function uploadAdminEntryImage(
+    eventId: number,
+    entryId: number,
+    image: File,
+): Promise<CrumbEntry> {
+    const formData = new FormData()
+
+    formData.append('image', image)
+
+    return request<CrumbEntry>(
+        `/api/admin/events/${eventId}/entries/${entryId}/image`,
+        {
+            method: 'POST',
+            body: formData,
         },
     )
 }

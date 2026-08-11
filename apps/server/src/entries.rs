@@ -278,10 +278,10 @@ async fn upload_entry_image(
         }
     };
 
-    if let Some(previous_filename) = entry.image_filename {
-        if previous_filename != filename {
-            remove_image_file(&previous_filename).await;
-        }
+    if let Some(previous_filename) = entry.image_filename
+        && previous_filename != filename
+    {
+        remove_image_file(&previous_filename).await;
     }
 
     Ok(Json(EntryResponse::from(updated)))
