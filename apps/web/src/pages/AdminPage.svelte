@@ -2,11 +2,14 @@
     import { onMount } from "svelte";
     import {
         ApiError,
+        createAdminEvent,
         getAdminSession,
         getAdminStatus,
+        listAdminEvents,
         loginAdmin,
         logoutAdmin,
         setupAdmin,
+        type CrumbEvent,
     } from "../lib/api";
 
     type View = "loading" | "setup" | "login" | "dashboard" | "error";
@@ -20,6 +23,16 @@
     let showPassword = false;
     let busy = false;
     let errorMessage = "";
+
+    let events: CrumbEvent[] = [];
+
+    let createEventOpen = false;
+    let eventTitle = "";
+    let eventSlug = "";
+    let eventDescription = "";
+    let eventSlugManuallyEdited = false;
+    let eventBusy = false;
+    let eventErrorMessage = "";
 
     onMount(() => {
         void bootstrap();
@@ -39,7 +52,12 @@
 
             const session = await getAdminSession();
 
-            view = session.authenticated ? "dashboard" : "login";
+            if (session.authenticated) {
+                await loadEvents();
+                view = "dashboard";
+            } else {
+                view = "login";
+            }
         } catch (error) {
             errorMessage = describeError(error);
             view = "error";
@@ -64,6 +82,8 @@
 
             clearSensitiveFields();
 
+            await loadEvents();
+
             view = "dashboard";
         } catch (error) {
             errorMessage = describeError(error);
@@ -83,6 +103,8 @@
 
             clearSensitiveFields();
 
+            await loadEvents();
+
             view = "dashboard";
         } catch (error) {
             errorMessage = describeError(error);
@@ -99,12 +121,103 @@
             await logoutAdmin();
 
             clearSensitiveFields();
+            closeCreateEvent();
+            events = [];
 
             view = "login";
         } catch (error) {
             errorMessage = describeError(error);
         } finally {
             busy = false;
+        }
+    }
+
+    async function loadEvents() {
+        events = await listAdminEvents();
+    }
+
+    function openCreateEvent() {
+        eventTitle = "";
+        eventSlug = "";
+        eventDescription = "";
+        eventSlugManuallyEdited = false;
+        eventErrorMessage = "";
+        createEventOpen = true;
+    }
+
+    function closeCreateEvent() {
+        createEventOpen = false;
+        eventTitle = "";
+        eventSlug = "";
+        eventDescription = "";
+        eventSlugManuallyEdited = false;
+        eventErrorMessage = "";
+    }
+
+    function handleEventTitleInput(event: Event) {
+        const input = event.currentTarget as HTMLInputElement;
+
+        eventTitle = input.value;
+
+        if (!eventSlugManuallyEdited) {
+            eventSlug = slugify(eventTitle);
+        }
+    }
+
+    function handleEventSlugInput(event: Event) {
+        const input = event.currentTarget as HTMLInputElement;
+
+        eventSlug = input.value
+            .toLowerCase()
+            .replace(/[^a-z0-9-]/g, "")
+            .replace(/-{2,}/g, "-")
+            .slice(0, 80);
+
+        eventSlugManuallyEdited = eventSlug.length > 0;
+    }
+
+    function slugify(value: string): string {
+        return value
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/-{2,}/g, "-")
+            .replace(/^-+|-+$/g, "")
+            .slice(0, 80);
+    }
+
+    async function handleCreateEvent(event: SubmitEvent) {
+        event.preventDefault();
+
+        eventErrorMessage = "";
+        eventBusy = true;
+
+        try {
+            const created = await createAdminEvent({
+                title: eventTitle.trim(),
+                slug: eventSlug.trim(),
+                description: eventDescription.trim() || null,
+            });
+
+            events = [created, ...events];
+
+            closeCreateEvent();
+        } catch (error) {
+            if (
+                error instanceof ApiError &&
+                error.code === "authentication_required"
+            ) {
+                closeCreateEvent();
+                clearSensitiveFields();
+                events = [];
+                view = "login";
+                return;
+            }
+
+            eventErrorMessage = describeError(error);
+        } finally {
+            eventBusy = false;
         }
     }
 
@@ -147,8 +260,25 @@
             password_verification_failed:
                 "CrumbVote could not verify the password.",
 
-            session_creation_failed:
-                "CrumbVote could not create an administrator session.",
+            authentication_required:
+                "Your administrator session has expired. Sign in again.",
+
+            title_required: "Give the event a title.",
+
+            title_too_long: "The event title is too long.",
+
+            slug_too_short:
+                "The event URL slug must contain at least 3 characters.",
+
+            slug_too_long: "The event URL slug is too long.",
+
+            invalid_slug:
+                "The event URL may only contain lowercase letters, numbers and single hyphens.",
+
+            description_too_long: "The event description is too long.",
+
+            event_slug_taken:
+                "That event URL is already being used. Choose another slug.",
         };
 
         return (
@@ -227,20 +357,29 @@
                             </h1>
 
                             <p class="mt-3 max-w-2xl leading-7 text-slate-400">
-                                CrumbVote is configured and your administrator
-                                session is active. Event management is our next
-                                stop.
+                                Create and manage voting events, then add the
+                                entries your visitors will vote for.
                             </p>
                         </div>
 
-                        <button
-                            type="button"
-                            disabled={busy}
-                            onclick={handleLogout}
-                            class="w-fit rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            {busy ? "Signing out…" : "Sign out"}
-                        </button>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button
+                                type="button"
+                                onclick={openCreateEvent}
+                                class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-950/30 transition hover:brightness-110"
+                            >
+                                + Create event
+                            </button>
+
+                            <button
+                                type="button"
+                                disabled={busy}
+                                onclick={handleLogout}
+                                class="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {busy ? "Signing out…" : "Sign out"}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -249,9 +388,12 @@
                         class="rounded-3xl border border-white/10 bg-white/[0.035] p-6"
                     >
                         <div class="text-sm text-slate-500">Events</div>
-                        <div class="mt-3 text-3xl font-semibold">0</div>
+                        <div class="mt-3 text-3xl font-semibold">
+                            {events.length}
+                        </div>
+
                         <div class="mt-2 text-sm text-slate-400">
-                            Event management arrives in M2.
+                            Voting events configured in CrumbVote.
                         </div>
                     </article>
 
@@ -284,34 +426,139 @@
                     </article>
                 </div>
 
-                <div
-                    class="mt-6 flex flex-1 items-center justify-center rounded-[2rem] border border-dashed border-white/10 bg-white/[0.02] px-6 py-16 text-center"
-                >
-                    <div class="max-w-md">
+                {#if events.length === 0}
+                    <div
+                        class="mt-6 flex flex-1 items-center justify-center rounded-[2rem] border border-dashed border-white/10 bg-white/[0.02] px-6 py-16 text-center"
+                    >
+                        <div class="max-w-md">
+                            <div
+                                class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-xl"
+                            >
+                                +
+                            </div>
+
+                            <h2 class="mt-5 text-xl font-semibold">
+                                No events yet
+                            </h2>
+
+                            <p class="mt-2 leading-7 text-slate-500">
+                                Create your first voting event. Entries, voting
+                                links and results will live inside it.
+                            </p>
+
+                            <button
+                                type="button"
+                                onclick={openCreateEvent}
+                                class="mt-6 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
+                            >
+                                Create first event
+                            </button>
+                        </div>
+                    </div>
+                {:else}
+                    <div
+                        class="mt-6 rounded-[2rem] border border-white/10 bg-white/[0.025] p-6 sm:p-8"
+                    >
                         <div
-                            class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-xl"
+                            class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
                         >
-                            +
+                            <div>
+                                <h2 class="text-xl font-semibold">Events</h2>
+
+                                <p class="mt-1 text-sm text-slate-500">
+                                    Your CrumbVote voting events.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onclick={openCreateEvent}
+                                class="w-fit rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                            >
+                                + New event
+                            </button>
                         </div>
 
-                        <h2 class="mt-5 text-xl font-semibold">
-                            No events yet
-                        </h2>
+                        <div class="mt-6 grid gap-4 lg:grid-cols-2">
+                            {#each events as event (event.id)}
+                                <article
+                                    class="group rounded-3xl border border-white/10 bg-slate-950/40 p-6 transition hover:border-white/20 hover:bg-slate-950/60"
+                                >
+                                    <div
+                                        class="flex items-start justify-between gap-4"
+                                    >
+                                        <div class="min-w-0">
+                                            <h3
+                                                class="truncate text-lg font-semibold text-white"
+                                            >
+                                                {event.title}
+                                            </h3>
 
-                        <p class="mt-2 leading-7 text-slate-500">
-                            Soon this is where you'll create the cake
-                            competition, add entries and open voting.
-                        </p>
+                                            <div
+                                                class="mt-1 truncate font-mono text-xs text-slate-600"
+                                            >
+                                                {event.slug}
+                                            </div>
+                                        </div>
 
-                        <button
-                            type="button"
-                            disabled
-                            class="mt-6 cursor-not-allowed rounded-xl bg-white/10 px-5 py-3 text-sm font-medium text-slate-500"
-                        >
-                            Create event · coming in M2
-                        </button>
+                                        {#if event.status === "open"}
+                                            <span
+                                                class="shrink-0 rounded-full border border-emerald-400/15 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300"
+                                            >
+                                                Open
+                                            </span>
+                                        {:else if event.status === "closed"}
+                                            <span
+                                                class="shrink-0 rounded-full border border-slate-400/15 bg-slate-400/10 px-3 py-1 text-xs font-medium text-slate-300"
+                                            >
+                                                Closed
+                                            </span>
+                                        {:else}
+                                            <span
+                                                class="shrink-0 rounded-full border border-violet-400/15 bg-violet-400/10 px-3 py-1 text-xs font-medium text-violet-300"
+                                            >
+                                                Draft
+                                            </span>
+                                        {/if}
+                                    </div>
+
+                                    <p
+                                        class="mt-4 min-h-12 text-sm leading-6 text-slate-400"
+                                    >
+                                        {event.description ??
+                                            "No description yet."}
+                                    </p>
+
+                                    <div
+                                        class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/5 pt-4 text-xs text-slate-600"
+                                    >
+                                        <span>
+                                            Created
+                                            {new Date(
+                                                event.created_at * 1000,
+                                            ).toLocaleString()}
+                                        </span>
+
+                                        <span>
+                                            Results:
+                                            {event.results_public
+                                                ? "public"
+                                                : "private"}
+                                        </span>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        disabled
+                                        class="mt-5 w-full cursor-not-allowed rounded-xl border border-white/5 bg-white/[0.03] px-4 py-2.5 text-sm text-slate-600"
+                                    >
+                                        Manage event · next slice
+                                    </button>
+                                </article>
+                            {/each}
+                        </div>
                     </div>
-                </div>
+                {/if}
             </section>
         {:else}
             <section class="flex flex-1 items-center justify-center py-12">
@@ -560,4 +807,154 @@
             </section>
         {/if}
     </div>
+
+    {#if createEventOpen}
+        <div
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+        >
+            <button
+                type="button"
+                aria-label="Close create event dialog"
+                disabled={eventBusy}
+                onclick={closeCreateEvent}
+                class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+            ></button>
+
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="create-event-title"
+                class="relative z-10 w-full max-w-xl rounded-[2rem] border border-white/10 bg-slate-900 p-6 shadow-2xl shadow-black/50 sm:p-8"
+            >
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <div
+                            class="mb-3 inline-flex rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-xs font-medium text-violet-300"
+                        >
+                            New voting event
+                        </div>
+
+                        <h2
+                            id="create-event-title"
+                            class="text-2xl font-semibold tracking-tight"
+                        >
+                            Create event
+                        </h2>
+
+                        <p class="mt-2 leading-6 text-slate-400">
+                            Start with the event itself. We'll add contestants
+                            and voting settings next.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        aria-label="Close"
+                        disabled={eventBusy}
+                        onclick={closeCreateEvent}
+                        class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-400 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <form class="mt-7 space-y-5" onsubmit={handleCreateEvent}>
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-300">
+                            Event title
+                        </span>
+
+                        <input
+                            value={eventTitle}
+                            oninput={handleEventTitleInput}
+                            type="text"
+                            maxlength="120"
+                            placeholder="Cake Beauty 2026"
+                            required
+                            class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3.5 text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-4 focus:ring-violet-400/10"
+                        />
+                    </label>
+
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-300">
+                            Event URL
+                        </span>
+
+                        <div
+                            class="mt-2 flex overflow-hidden rounded-xl border border-white/10 bg-slate-950/60 transition focus-within:border-violet-400/50 focus-within:ring-4 focus-within:ring-violet-400/10"
+                        >
+                            <span
+                                class="flex items-center border-r border-white/10 px-3 text-sm text-slate-600"
+                            >
+                                /e/
+                            </span>
+
+                            <input
+                                value={eventSlug}
+                                oninput={handleEventSlugInput}
+                                type="text"
+                                maxlength="80"
+                                spellcheck="false"
+                                placeholder="cake-beauty-2026"
+                                required
+                                class="min-w-0 flex-1 bg-transparent px-3 py-3.5 font-mono text-sm text-white outline-none placeholder:text-slate-700"
+                            />
+                        </div>
+
+                        <span class="mt-2 block text-xs text-slate-600">
+                            Generated automatically from the title, but you can
+                            edit it.
+                        </span>
+                    </label>
+
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-300">
+                            Description
+                        </span>
+
+                        <textarea
+                            bind:value={eventDescription}
+                            maxlength="2000"
+                            rows="4"
+                            placeholder="Tell visitors what this event is about…"
+                            class="mt-2 w-full resize-none rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3.5 text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-4 focus:ring-violet-400/10"
+                        ></textarea>
+
+                        <div class="mt-2 text-right text-xs text-slate-600">
+                            {eventDescription.length} / 2000
+                        </div>
+                    </label>
+
+                    {#if eventErrorMessage}
+                        <div
+                            class="rounded-xl border border-red-400/15 bg-red-400/10 px-4 py-3 text-sm leading-6 text-red-200"
+                        >
+                            {eventErrorMessage}
+                        </div>
+                    {/if}
+
+                    <div
+                        class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end"
+                    >
+                        <button
+                            type="button"
+                            disabled={eventBusy}
+                            onclick={closeCreateEvent}
+                            class="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            disabled={eventBusy}
+                            class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-950/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {eventBusy ? "Creating…" : "Create event"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {/if}
 </main>

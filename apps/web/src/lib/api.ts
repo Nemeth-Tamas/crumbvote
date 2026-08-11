@@ -10,6 +10,23 @@ export type SetupResult = {
     configured: boolean
 }
 
+export type CrumbEvent = {
+    id: number
+    slug: string
+    title: string
+    description: string | null
+    status: string
+    results_public: boolean
+    created_at: number
+    updated_at: number
+}
+
+export type CreateEventInput = {
+    title: string
+    slug: string
+    description: string | null
+}
+
 export class ApiError extends Error {
     constructor(
         public readonly status: number,
@@ -98,5 +115,18 @@ export function loginAdmin(
 export function logoutAdmin(): Promise<AdminSession> {
     return request<AdminSession>('/api/admin/logout', {
         method: 'POST',
+    })
+}
+
+export function listAdminEvents(): Promise<CrumbEvent[]> {
+    return request<CrumbEvent[]>('/api/admin/events')
+}
+
+export function createAdminEvent(
+    input: CreateEventInput,
+): Promise<CrumbEvent> {
+    return request<CrumbEvent>('/api/admin/events', {
+        method: 'POST',
+        body: JSON.stringify(input),
     })
 }
