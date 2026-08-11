@@ -2,16 +2,29 @@
     import { onMount } from "svelte";
     import {
         ApiError,
+        castPublicVote,
+        ensurePublicVoter,
         getPublicEntry,
+        getPublicVote,
         type PublicEntryPayload,
     } from "../lib/api";
+
+    const VOTER_STORAGE_KEY = "crumbvote_voter_token";
 
     export let eventSlug: string;
     export let entryId: number;
 
     let payload: PublicEntryPayload | null = null;
+
+    let voterToken = "";
+    let currentVoteEntryId: number | null = null;
+
     let loading = true;
+    let voteBusy = false;
+
     let errorMessage = "";
+    let voteErrorMessage = "";
+    let voteSuccessMessage = "";
 
     onMount(() => {
         void loadEntry();
@@ -22,11 +35,85 @@
         errorMessage = "";
 
         try {
-            payload = await getPublicEntry(eventSlug, entryId);
+            const loaded = await getPublicEntry(eventSlug, entryId);
+
+            const token = await ensureVoterIdentity();
+
+            const vote = await getPublicVote(eventSlug, token);
+
+            payload = loaded;
+            voterToken = token;
+            currentVoteEntryId = vote.entry_id;
         } catch (error) {
+            payload = null;
             errorMessage = describeError(error);
         } finally {
             loading = false;
+        }
+    }
+
+    async function ensureVoterIdentity(): Promise<string> {
+        const stored = window.localStorage.getItem(VOTER_STORAGE_KEY);
+
+        try {
+            const voter = await ensurePublicVoter(stored);
+
+            rememberVoterToken(voter.token);
+
+            return voter.token;
+        } catch (error) {
+            if (
+                stored !== null &&
+                error instanceof ApiError &&
+                error.code === "invalid_voter_token"
+            ) {
+                window.localStorage.removeItem(VOTER_STORAGE_KEY);
+
+                const voter = await ensurePublicVoter(null);
+
+                rememberVoterToken(voter.token);
+
+                return voter.token;
+            }
+
+            throw error;
+        }
+    }
+
+    function rememberVoterToken(token: string) {
+        window.localStorage.setItem(VOTER_STORAGE_KEY, token);
+    }
+
+    async function handleVote() {
+        if (
+            payload === null ||
+            voterToken.length === 0 ||
+            payload.event.status !== "open"
+        ) {
+            return;
+        }
+
+        const previousVote = currentVoteEntryId;
+
+        voteBusy = true;
+        voteErrorMessage = "";
+        voteSuccessMessage = "";
+
+        try {
+            const vote = await castPublicVote(
+                eventSlug,
+                payload.entry.id,
+                voterToken,
+            );
+
+            currentVoteEntryId = vote.entry_id;
+
+            voteSuccessMessage =
+                previousVote === null ? "Vote recorded." : "Vote changed.";
+        } catch (error) {
+            voteErrorMessage = describeError(error);
+        } finally {
+            voteBusy = false;
         }
     }
 
@@ -41,6 +128,16 @@
 
             case "database_error":
                 return "CrumbVote could not load this entry.";
+
+            case "voter_token_required":
+            case "invalid_voter_token":
+                return "CrumbVote could not identify this browser.";
+
+            case "voter_creation_failed":
+                return "CrumbVote could not create a voter identity.";
+
+            case "voting_not_open":
+                return "Voting is not currently open.";
 
             default:
                 return `The request failed with error "${error.code}".`;
@@ -214,16 +311,82 @@
                                 <div
                                     class="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.07] p-5"
                                 >
-                                    <div class="font-semibold text-emerald-200">
-                                        Voting is open
-                                    </div>
+                                    {#if currentVoteEntryId === payload.entry.id}
+                                        <div
+                                            class="font-semibold text-emerald-200"
+                                        >
+                                            This is your current vote
+                                        </div>
 
-                                    <p
-                                        class="mt-2 text-sm leading-6 text-slate-400"
-                                    >
-                                        This entry is eligible while the event
-                                        is open.
-                                    </p>
+                                        <p
+                                            class="mt-2 text-sm leading-6 text-slate-400"
+                                        >
+                                            You can visit another entry and move
+                                            your vote there while voting remains
+                                            open.
+                                        </p>
+
+                                        <button
+                                            type="button"
+                                            disabled
+                                            class="mt-5 w-full cursor-default rounded-xl bg-emerald-300 px-5 py-3.5 text-sm font-semibold text-emerald-950"
+                                        >
+                                            Your vote ✓
+                                        </button>
+                                    {:else}
+                                        <div
+                                            class="font-semibold text-emerald-200"
+                                        >
+                                            {currentVoteEntryId === null
+                                                ? "Ready to vote?"
+                                                : "Change your vote?"}
+                                        </div>
+
+                                        <p
+                                            class="mt-2 text-sm leading-6 text-slate-400"
+                                        >
+                                            {#if currentVoteEntryId === null}
+                                                Choose this entry as your vote
+                                                for the event.
+                                            {:else}
+                                                You already voted for another
+                                                entry. Choosing this one moves
+                                                your vote here.
+                                            {/if}
+                                        </p>
+
+                                        <button
+                                            type="button"
+                                            disabled={voteBusy}
+                                            onclick={() => void handleVote()}
+                                            class="mt-5 w-full rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-950/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            {#if voteBusy}
+                                                Saving vote…
+                                            {:else if currentVoteEntryId === null}
+                                                Vote for #{payload.entry.number}
+                                            {:else}
+                                                Change vote to #{payload.entry
+                                                    .number}
+                                            {/if}
+                                        </button>
+                                    {/if}
+
+                                    {#if voteErrorMessage}
+                                        <div
+                                            class="mt-4 rounded-xl border border-red-400/15 bg-red-400/10 px-4 py-3 text-sm text-red-200"
+                                        >
+                                            {voteErrorMessage}
+                                        </div>
+                                    {/if}
+
+                                    {#if voteSuccessMessage}
+                                        <div
+                                            class="mt-4 rounded-xl border border-emerald-400/15 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200"
+                                        >
+                                            {voteSuccessMessage}
+                                        </div>
+                                    {/if}
                                 </div>
                             {:else if payload.event.status === "closed"}
                                 <div

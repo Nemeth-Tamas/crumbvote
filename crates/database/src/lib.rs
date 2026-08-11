@@ -326,6 +326,55 @@ pub async fn set_entry_image_filename(
     Ok(Some(active_entry.update(database).await?))
 }
 
+pub use entity::vote::Model as VoteModel;
+
+pub async fn current_vote(
+    database: &DatabaseConnection,
+    event_id: i32,
+    voter_hash: &str,
+) -> Result<Option<VoteModel>, DbErr> {
+    entity::vote::Entity::find()
+        .filter(entity::vote::Column::EventId.eq(event_id))
+        .filter(entity::vote::Column::VoterHash.eq(voter_hash))
+        .one(database)
+        .await
+}
+
+pub async fn set_vote(
+    database: &DatabaseConnection,
+    event_id: i32,
+    voter_hash: String,
+    entry_id: i32,
+) -> Result<VoteModel, DbErr> {
+    let existing = entity::vote::Entity::find()
+        .filter(entity::vote::Column::EventId.eq(event_id))
+        .filter(entity::vote::Column::VoterHash.eq(voter_hash.clone()))
+        .one(database)
+        .await?;
+
+    let now = unix_timestamp()?;
+
+    if let Some(existing) = existing {
+        let mut active_vote: entity::vote::ActiveModel = existing.into();
+
+        active_vote.entry_id = Set(entry_id);
+        active_vote.updated_at = Set(now);
+
+        return active_vote.update(database).await;
+    }
+
+    entity::vote::ActiveModel {
+        id: NotSet,
+        event_id: Set(event_id),
+        voter_hash: Set(voter_hash),
+        entry_id: Set(entry_id),
+        created_at: Set(now),
+        updated_at: Set(now),
+    }
+    .insert(database)
+    .await
+}
+
 fn unix_timestamp() -> Result<i64, DbErr> {
     let seconds = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -375,6 +424,13 @@ mod tests {
                 .has_table("entries")
                 .await
                 .expect("entries schema check should succeed")
+        );
+
+        assert!(
+            schema
+                .has_table("votes")
+                .await
+                .expect("votes schema check should succeed")
         );
 
         assert!(
@@ -516,6 +572,36 @@ mod tests {
             imaged_entry.image_filename.as_deref(),
             Some("test-image.jpg")
         );
+
+        let voter_hash = "test-browser-voter-hash";
+
+        assert!(
+            current_vote(&database, event.id, voter_hash,)
+                .await
+                .expect("vote lookup should succeed")
+                .is_none()
+        );
+
+        let first_vote = set_vote(&database, event.id, voter_hash.to_owned(), first_entry.id)
+            .await
+            .expect("first vote should succeed");
+
+        assert_eq!(first_vote.entry_id, first_entry.id);
+
+        let changed_vote = set_vote(&database, event.id, voter_hash.to_owned(), second_entry.id)
+            .await
+            .expect("vote change should succeed");
+
+        assert_eq!(changed_vote.id, first_vote.id);
+
+        assert_eq!(changed_vote.entry_id, second_entry.id);
+
+        let current = current_vote(&database, event.id, voter_hash)
+            .await
+            .expect("vote lookup should succeed")
+            .expect("vote should exist");
+
+        assert_eq!(current.entry_id, second_entry.id);
 
         let updated = update_event(
             &database,

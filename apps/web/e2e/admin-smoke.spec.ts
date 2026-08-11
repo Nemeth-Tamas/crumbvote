@@ -267,6 +267,56 @@ test(
             .getByRole(
                 'button',
                 {
+                    name: /Add entry/,
+                },
+            )
+            .first()
+            .click()
+
+        const secondEntryDialog =
+            page.getByRole(
+                'dialog',
+                {
+                    name: 'Add entry',
+                },
+            )
+
+        await secondEntryDialog
+            .getByLabel(
+                'Entry name',
+            )
+            .fill('E2E Chocolate Cake')
+
+        await secondEntryDialog
+            .getByLabel(
+                'Description',
+            )
+            .fill(
+                'Chocolate opposition candidate.',
+            )
+
+        await secondEntryDialog
+            .getByRole(
+                'button',
+                {
+                    name: 'Add entry',
+                },
+            )
+            .click()
+
+        await expect(
+            page
+                .getByRole('article')
+                .filter({
+                    hasText:
+                        'E2E Chocolate Cake',
+                }),
+        ).toBeVisible()
+
+        await page
+            .getByRole(
+                'button',
+                {
                     name: 'Open voting',
                 },
             )
@@ -370,14 +420,98 @@ test(
         ).toBeVisible()
 
         await expect(
-            page.getByText(
-                'Voting is open',
-            ).first(),
-        ).toBeVisible()
-
-        await expect(
             page.getByAltText(
                 'E2E Raspberry Cake Deluxe',
+            ),
+        ).toBeVisible()
+
+        await page
+            .getByRole(
+                'button',
+                {
+                    name: /Vote for #1/,
+                },
+            )
+            .click()
+
+        await expect(
+            page.getByRole(
+                'button',
+                {
+                    name: /Your vote/,
+                },
+            ),
+        ).toBeDisabled()
+
+        await page.reload()
+
+        await expect(
+            page.getByRole(
+                'button',
+                {
+                    name: /Your vote/,
+                },
+            ),
+        ).toBeDisabled()
+
+        await page.goto(
+            '/e/e2e-cake-show/2',
+        )
+
+        await expect(
+            page.getByRole(
+                'heading',
+                {
+                    name: 'E2E Chocolate Cake',
+                },
+            ),
+        ).toBeVisible()
+
+        await page
+            .getByRole(
+                'button',
+                {
+                    name: /Change vote to #2/,
+                },
+            )
+            .click()
+
+        await expect(
+            page.getByRole(
+                'button',
+                {
+                    name: /Your vote/,
+                },
+            ),
+        ).toBeDisabled()
+
+        await page.evaluate(() => {
+            window.localStorage.removeItem(
+                'crumbvote_voter_token',
+            )
+        })
+
+        await page.reload()
+
+        await expect(
+            page.getByRole(
+                'button',
+                {
+                    name: /Your vote/,
+                },
+            ),
+        ).toBeDisabled()
+
+        await page.goto(
+            '/e/e2e-cake-show/1',
+        )
+
+        await expect(
+            page.getByRole(
+                'button',
+                {
+                    name: /Change vote to #1/,
+                },
             ),
         ).toBeVisible()
 

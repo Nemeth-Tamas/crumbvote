@@ -81,6 +81,14 @@ export type PublicEntryPayload = {
     entry: PublicEntry
 }
 
+export type PublicVoterIdentity = {
+    token: string
+}
+
+export type PublicVote = {
+    entry_id: number | null
+}
+
 export class ApiError extends Error {
     constructor(
         public readonly status: number,
@@ -269,5 +277,52 @@ export function getPublicEntry(
 ): Promise<PublicEntryPayload> {
     return request<PublicEntryPayload>(
         `/api/public/events/${eventSlug}/entries/${entryId}`,
+    )
+}
+
+export function ensurePublicVoter(
+    token: string | null,
+): Promise<PublicVoterIdentity> {
+    return request<PublicVoterIdentity>(
+        '/api/public/voter',
+        {
+            method: 'POST',
+            body: JSON.stringify({ token }),
+        },
+    )
+}
+
+export function getPublicVote(
+    eventSlug: string,
+    voterToken: string,
+): Promise<PublicVote> {
+    return request<PublicVote>(
+        `/api/public/events/${eventSlug}/vote`,
+        {
+            headers: {
+                'X-CrumbVote-Voter':
+                    voterToken,
+            },
+        },
+    )
+}
+
+export function castPublicVote(
+    eventSlug: string,
+    entryId: number,
+    voterToken: string,
+): Promise<PublicVote> {
+    return request<PublicVote>(
+        `/api/public/events/${eventSlug}/vote`,
+        {
+            method: 'POST',
+            headers: {
+                'X-CrumbVote-Voter':
+                    voterToken,
+            },
+            body: JSON.stringify({
+                entry_id: entryId,
+            }),
+        },
     )
 }

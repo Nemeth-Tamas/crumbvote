@@ -5,7 +5,7 @@ use argon2::{
 use sha2::{Digest, Sha256};
 
 const SETUP_CODE_RANDOM_BYTES: usize = 8;
-const SESSION_TOKEN_RANDOM_BYTES: usize = 32;
+const RANDOM_TOKEN_BYTES: usize = 32;
 
 pub fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error> {
     let mut salt_bytes = [0_u8; 16];
@@ -30,16 +30,24 @@ pub fn verify_password(
         .is_ok())
 }
 
-pub fn generate_session_token() -> Result<String, getrandom::Error> {
-    let mut bytes = [0_u8; SESSION_TOKEN_RANDOM_BYTES];
+pub fn generate_random_token() -> Result<String, getrandom::Error> {
+    let mut bytes = [0_u8; RANDOM_TOKEN_BYTES];
 
     getrandom::fill(&mut bytes)?;
 
     Ok(hex::encode(bytes))
 }
 
-pub fn hash_session_token(token: &str) -> String {
+pub fn hash_token(token: &str) -> String {
     hex::encode(Sha256::digest(token.as_bytes()))
+}
+
+pub fn generate_session_token() -> Result<String, getrandom::Error> {
+    generate_random_token()
+}
+
+pub fn hash_session_token(token: &str) -> String {
+    hash_token(token)
 }
 
 pub fn generate_setup_code() -> Result<String, getrandom::Error> {
