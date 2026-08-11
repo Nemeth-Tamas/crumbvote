@@ -56,6 +56,60 @@ const hu = {
     'landing.developmentBuild':
         'Fejlesztői verzió',
 
+    'landing.linkEyebrow':
+        'Van már szavazási linked?',
+
+    'landing.linkTitle':
+        'Nyisd meg itt',
+
+    'landing.linkDescription':
+        'A QR-kód általában közvetlenül a nevezéshez visz. Ha inkább linket kaptál, másold be ide.',
+
+    'landing.linkLabel':
+        'Szavazási vagy eredménylink',
+
+    'landing.linkPlaceholder':
+        'https://…/e/torta-2026/12',
+
+    'landing.openLink':
+        'Megnyitás',
+
+    'landing.invalidLink':
+        'Ez nem érvényes CrumbVote szavazási vagy eredménylink.',
+
+    'landing.organizerPrompt':
+        'Te szervezed az eseményt?',
+
+    'landing.organizerDescription':
+        'Hozz létre eseményeket, nevezéseket, kezeld a szavazást és nézd meg a statisztikákat.',
+
+    'landing.openAdmin':
+        'Adminfelület megnyitása →',
+
+    'landing.howTitle':
+        'Így működik',
+
+    'landing.howDescription':
+        'Nincs alkalmazás és nincs regisztráció. Egy telefon és a nevezések QR-kódjai elegendők.',
+
+    'landing.stepScanTitle':
+        '1. Olvasd be',
+
+    'landing.stepScanDescription':
+        'Olvasd be egy nevezés QR-kódját, vagy nyisd meg a kapott linket.',
+
+    'landing.stepReviewTitle':
+        '2. Nézd meg',
+
+    'landing.stepReviewDescription':
+        'Megjelenik a nevezés képe, száma és a szervező által megadott leírás.',
+
+    'landing.stepVoteTitle':
+        '3. Szavazz',
+
+    'landing.stepVoteDescription':
+        'Add le a szavazatod. Amíg nyitva van a szavazás, egy másik nevezésnél módosíthatod.',
+
     'common.backToCrumbVote':
         'Vissza a CrumbVote-hoz',
 
@@ -383,6 +437,60 @@ const en: Record<
     'landing.developmentBuild':
         'Development build',
 
+    'landing.linkEyebrow':
+        'Already have a voting link?',
+
+    'landing.linkTitle':
+        'Open it here',
+
+    'landing.linkDescription':
+        'A QR code normally takes you straight to an entry. If you received a link instead, paste it here.',
+
+    'landing.linkLabel':
+        'Voting or results link',
+
+    'landing.linkPlaceholder':
+        'https://…/e/cake-show-2026/12',
+
+    'landing.openLink':
+        'Open',
+
+    'landing.invalidLink':
+        'That is not a valid CrumbVote voting or results link.',
+
+    'landing.organizerPrompt':
+        'Organizing the event?',
+
+    'landing.organizerDescription':
+        'Create events and entries, control voting and inspect your analytics.',
+
+    'landing.openAdmin':
+        'Open admin console →',
+
+    'landing.howTitle':
+        'How it works',
+
+    'landing.howDescription':
+        'No app and no registration. A phone and the entries’ QR codes are enough.',
+
+    'landing.stepScanTitle':
+        '1. Scan',
+
+    'landing.stepScanDescription':
+        'Scan an entry QR code or open the voting link you received.',
+
+    'landing.stepReviewTitle':
+        '2. Review',
+
+    'landing.stepReviewDescription':
+        'See the entry image, number and description provided by the organizer.',
+
+    'landing.stepVoteTitle':
+        '3. Vote',
+
+    'landing.stepVoteDescription':
+        'Cast your vote. While voting is open, visiting another entry lets you change it.',
+
     'common.backToCrumbVote':
         'Back to CrumbVote',
 
@@ -706,6 +814,60 @@ const de: Record<
 
     'landing.developmentBuild':
         'Entwicklungsversion',
+
+    'landing.linkEyebrow':
+        'Schon einen Abstimmungslink erhalten?',
+
+    'landing.linkTitle':
+        'Hier öffnen',
+
+    'landing.linkDescription':
+        'Ein QR-Code führt normalerweise direkt zu einem Beitrag. Wenn du stattdessen einen Link erhalten hast, füge ihn hier ein.',
+
+    'landing.linkLabel':
+        'Abstimmungs- oder Ergebnislink',
+
+    'landing.linkPlaceholder':
+        'https://…/e/kuchen-2026/12',
+
+    'landing.openLink':
+        'Öffnen',
+
+    'landing.invalidLink':
+        'Das ist kein gültiger CrumbVote-Abstimmungs- oder Ergebnislink.',
+
+    'landing.organizerPrompt':
+        'Du organisierst die Veranstaltung?',
+
+    'landing.organizerDescription':
+        'Erstelle Veranstaltungen und Beiträge, steuere die Abstimmung und sieh dir die Statistiken an.',
+
+    'landing.openAdmin':
+        'Adminbereich öffnen →',
+
+    'landing.howTitle':
+        'So funktioniert es',
+
+    'landing.howDescription':
+        'Keine App und keine Registrierung. Ein Smartphone und die QR-Codes der Beiträge reichen aus.',
+
+    'landing.stepScanTitle':
+        '1. Scannen',
+
+    'landing.stepScanDescription':
+        'Scanne den QR-Code eines Beitrags oder öffne den erhaltenen Abstimmungslink.',
+
+    'landing.stepReviewTitle':
+        '2. Ansehen',
+
+    'landing.stepReviewDescription':
+        'Sieh dir Bild, Nummer und die Beschreibung des Veranstalters an.',
+
+    'landing.stepVoteTitle':
+        '3. Abstimmen',
+
+    'landing.stepVoteDescription':
+        'Gib deine Stimme ab. Solange die Abstimmung geöffnet ist, kannst du sie bei einem anderen Beitrag ändern.',
 
     'common.backToCrumbVote':
         'Zurück zu CrumbVote',
