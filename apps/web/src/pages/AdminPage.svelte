@@ -515,7 +515,6 @@
                                                     : "password"}
                                                 autocomplete="current-password"
                                                 required
-                                                autofocus
                                                 class="w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3.5 pr-20 text-white outline-none transition focus:border-violet-400/50 focus:ring-4 focus:ring-violet-400/10"
                                             />
 
