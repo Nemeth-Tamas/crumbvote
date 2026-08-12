@@ -619,6 +619,102 @@ const hu = {
 
     'workspace.errorCopyLink':
         'A szavazási linket nem sikerült másolni.',
+
+    'workspace.entries':
+        'Nevezések',
+
+    'workspace.entriesDraftDescription':
+        'A szavazás megnyitása előtt add hozzá a nevezéseket.',
+
+    'workspace.entriesLockedDescription':
+        'A nevezések listája zárolva van, amíg az esemény élő vagy már korábban élő volt.',
+
+    'workspace.addEntry':
+        'Nevezés hozzáadása',
+
+    'workspace.entriesSectionDescription':
+        'Nevezések és a hozzájuk tartozó állandó szavazási linkek.',
+
+    'workspace.noEntriesTitle':
+        'Még nincsenek nevezések',
+
+    'workspace.noEntriesDescription':
+        'Add hozzá a tortákat vagy más nevezéseket, amelyekre a látogatók szavazhatnak.',
+
+    'workspace.noEntryDescription':
+        'Nincs leírás.',
+
+    'workspace.edit':
+        'Szerkesztés',
+
+    'workspace.votingLink':
+        'Szavazási link',
+
+    'workspace.copied':
+        'Másolva',
+
+    'workspace.copy':
+        'Másolás',
+
+    'workspace.closeAddEntryDialog':
+        'Nevezés hozzáadása ablak bezárása',
+
+    'workspace.newContestant':
+        'Új nevezés',
+
+    'workspace.addEntryDescription':
+        'A nevezés száma és állandó szavazási linkje automatikusan létrejön.',
+
+    'workspace.entryName':
+        'Nevezés neve',
+
+    'workspace.entryNamePlaceholder':
+        'Málnás csokitorta',
+
+    'workspace.optionalDescriptionPlaceholder':
+        'Opcionális leírás…',
+
+    'workspace.adding':
+        'Hozzáadás…',
+
+    'workspace.closeEditEntryDialog':
+        'Nevezés szerkesztése ablak bezárása',
+
+    'workspace.editEntry':
+        'Nevezés szerkesztése',
+
+    'workspace.editEntryDescription':
+        'Módosítsd a nevezés adatait és nyilvános képét.',
+
+    'workspace.entryImage':
+        'Nevezés képe',
+
+    'workspace.selectedPreview':
+        'Kiválasztott kép előnézete',
+
+    'workspace.noImageYet':
+        'Még nincs kép',
+
+    'workspace.replaceImage':
+        'Kép cseréje',
+
+    'workspace.chooseImage':
+        'Kép kiválasztása',
+
+    'workspace.imageRequirements':
+        'JPEG, PNG vagy WebP · max. 8 MiB',
+
+    'workspace.browse':
+        'Tallózás',
+
+    'workspace.selectedFile':
+        'Kiválasztva: {name}',
+
+    'workspace.permanentVotingLink':
+        'Állandó szavazási link',
+
+    'workspace.saveEntry':
+        'Nevezés mentése',
 } as const
 
 export type TranslationKey =
@@ -1231,6 +1327,102 @@ const en: Record<
 
     'workspace.errorCopyLink':
         'The voting link could not be copied.',
+
+    'workspace.entries':
+        'Entries',
+
+    'workspace.entriesDraftDescription':
+        'Add contestants before opening voting.',
+
+    'workspace.entriesLockedDescription':
+        'The contestant list is locked while the event is or has been live.',
+
+    'workspace.addEntry':
+        'Add entry',
+
+    'workspace.entriesSectionDescription':
+        'Contestants and their stable voting links.',
+
+    'workspace.noEntriesTitle':
+        'No entries yet',
+
+    'workspace.noEntriesDescription':
+        'Add the cakes or contestants that visitors will be able to vote for.',
+
+    'workspace.noEntryDescription':
+        'No description.',
+
+    'workspace.edit':
+        'Edit',
+
+    'workspace.votingLink':
+        'Voting link',
+
+    'workspace.copied':
+        'Copied',
+
+    'workspace.copy':
+        'Copy',
+
+    'workspace.closeAddEntryDialog':
+        'Close add entry dialog',
+
+    'workspace.newContestant':
+        'New contestant',
+
+    'workspace.addEntryDescription':
+        'The entry number and permanent voting link are assigned automatically.',
+
+    'workspace.entryName':
+        'Entry name',
+
+    'workspace.entryNamePlaceholder':
+        'Raspberry chocolate cake',
+
+    'workspace.optionalDescriptionPlaceholder':
+        'Optional description…',
+
+    'workspace.adding':
+        'Adding…',
+
+    'workspace.closeEditEntryDialog':
+        'Close edit entry dialog',
+
+    'workspace.editEntry':
+        'Edit entry',
+
+    'workspace.editEntryDescription':
+        'Update contestant details and its public image.',
+
+    'workspace.entryImage':
+        'Entry image',
+
+    'workspace.selectedPreview':
+        'Selected preview',
+
+    'workspace.noImageYet':
+        'No image yet',
+
+    'workspace.replaceImage':
+        'Replace image',
+
+    'workspace.chooseImage':
+        'Choose image',
+
+    'workspace.imageRequirements':
+        'JPEG, PNG or WebP · max 8 MiB',
+
+    'workspace.browse':
+        'Browse',
+
+    'workspace.selectedFile':
+        'Selected: {name}',
+
+    'workspace.permanentVotingLink':
+        'Permanent voting link',
+
+    'workspace.saveEntry':
+        'Save entry',
 }
 
 const de: Record<
@@ -1840,6 +2032,102 @@ const de: Record<
 
     'workspace.errorCopyLink':
         'Der Abstimmungslink konnte nicht kopiert werden.',
+
+    'workspace.entries':
+        'Beiträge',
+
+    'workspace.entriesDraftDescription':
+        'Füge Beiträge hinzu, bevor du die Abstimmung öffnest.',
+
+    'workspace.entriesLockedDescription':
+        'Die Beitragsliste ist gesperrt, sobald die Veranstaltung live ist oder bereits live war.',
+
+    'workspace.addEntry':
+        'Beitrag hinzufügen',
+
+    'workspace.entriesSectionDescription':
+        'Beiträge und ihre dauerhaften Abstimmungslinks.',
+
+    'workspace.noEntriesTitle':
+        'Noch keine Beiträge',
+
+    'workspace.noEntriesDescription':
+        'Füge Kuchen oder andere Beiträge hinzu, für die Besucher abstimmen können.',
+
+    'workspace.noEntryDescription':
+        'Keine Beschreibung.',
+
+    'workspace.edit':
+        'Bearbeiten',
+
+    'workspace.votingLink':
+        'Abstimmungslink',
+
+    'workspace.copied':
+        'Kopiert',
+
+    'workspace.copy':
+        'Kopieren',
+
+    'workspace.closeAddEntryDialog':
+        'Dialog zum Hinzufügen eines Beitrags schließen',
+
+    'workspace.newContestant':
+        'Neuer Beitrag',
+
+    'workspace.addEntryDescription':
+        'Beitragsnummer und dauerhafter Abstimmungslink werden automatisch vergeben.',
+
+    'workspace.entryName':
+        'Name des Beitrags',
+
+    'workspace.entryNamePlaceholder':
+        'Himbeer-Schokoladenkuchen',
+
+    'workspace.optionalDescriptionPlaceholder':
+        'Optionale Beschreibung…',
+
+    'workspace.adding':
+        'Wird hinzugefügt…',
+
+    'workspace.closeEditEntryDialog':
+        'Dialog zum Bearbeiten eines Beitrags schließen',
+
+    'workspace.editEntry':
+        'Beitrag bearbeiten',
+
+    'workspace.editEntryDescription':
+        'Bearbeite die Angaben zum Beitrag und sein öffentliches Bild.',
+
+    'workspace.entryImage':
+        'Bild des Beitrags',
+
+    'workspace.selectedPreview':
+        'Vorschau des ausgewählten Bildes',
+
+    'workspace.noImageYet':
+        'Noch kein Bild',
+
+    'workspace.replaceImage':
+        'Bild ersetzen',
+
+    'workspace.chooseImage':
+        'Bild auswählen',
+
+    'workspace.imageRequirements':
+        'JPEG, PNG oder WebP · max. 8 MiB',
+
+    'workspace.browse':
+        'Durchsuchen',
+
+    'workspace.selectedFile':
+        'Ausgewählt: {name}',
+
+    'workspace.permanentVotingLink':
+        'Dauerhafter Abstimmungslink',
+
+    'workspace.saveEntry':
+        'Beitrag speichern',
 }
 
 const translations: Record<

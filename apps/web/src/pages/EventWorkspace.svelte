@@ -977,7 +977,9 @@
                 <article
                     class="rounded-[2rem] border border-white/10 bg-white/[0.025] p-6"
                 >
-                    <div class="text-sm text-slate-500">Entries</div>
+                    <div class="text-sm text-slate-500">
+                        {translate($locale, "workspace.entries")}
+                    </div>
 
                     <div class="mt-3 text-3xl font-semibold">
                         {entries.length}
@@ -985,10 +987,15 @@
 
                     <p class="mt-2 text-sm leading-6 text-slate-500">
                         {#if event.status === "draft"}
-                            Add contestants before opening voting.
+                            {translate(
+                                $locale,
+                                "workspace.entriesDraftDescription",
+                            )}
                         {:else}
-                            The contestant list is locked while the event is or
-                            has been live.
+                            {translate(
+                                $locale,
+                                "workspace.entriesLockedDescription",
+                            )}
                         {/if}
                     </p>
 
@@ -998,7 +1005,7 @@
                         onclick={openCreateEntry}
                         class="mt-5 w-full rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-none disabled:bg-white/[0.03] disabled:text-slate-600"
                     >
-                        + Add entry
+                        + {translate($locale, "workspace.addEntry")}
                     </button>
                 </article>
 
@@ -1029,10 +1036,15 @@
                 class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
             >
                 <div>
-                    <h2 class="text-xl font-semibold">Entries</h2>
+                    <h2 class="text-xl font-semibold">
+                        {translate($locale, "workspace.entries")}
+                    </h2>
 
                     <p class="mt-1 text-sm text-slate-500">
-                        Contestants and their stable voting links.
+                        {translate(
+                            $locale,
+                            "workspace.entriesSectionDescription",
+                        )}
                     </p>
                 </div>
 
@@ -1042,7 +1054,7 @@
                     onclick={openCreateEntry}
                     class="w-fit rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                    + Add entry
+                    + {translate($locale, "workspace.addEntry")}
                 </button>
             </div>
 
@@ -1056,13 +1068,14 @@
                         #
                     </div>
 
-                    <h3 class="mt-4 font-semibold">No entries yet</h3>
+                    <h3 class="mt-4 font-semibold">
+                        {translate($locale, "workspace.noEntriesTitle")}
+                    </h3>
 
                     <p
                         class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500"
                     >
-                        Add the cakes or contestants that visitors will be able
-                        to vote for.
+                        {translate($locale, "workspace.noEntriesDescription")}
                     </p>
                 </div>
             {:else}
@@ -1094,7 +1107,10 @@
                                             <div
                                                 class="mt-3 text-xs text-slate-600"
                                             >
-                                                No image
+                                                {translate(
+                                                    $locale,
+                                                    "common.noImage",
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -1122,7 +1138,10 @@
                                             class="mt-2 min-h-10 text-sm leading-5 text-slate-500"
                                         >
                                             {entry.description ??
-                                                "No description."}
+                                                translate(
+                                                    $locale,
+                                                    "workspace.noEntryDescription",
+                                                )}
                                         </p>
                                     </div>
 
@@ -1132,7 +1151,7 @@
                                         onclick={() => openEditEntry(entry)}
                                         class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-violet-400/30 hover:bg-violet-400/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
                                     >
-                                        Edit
+                                        {translate($locale, "workspace.edit")}
                                     </button>
                                 </div>
 
@@ -1140,7 +1159,10 @@
                                     <div
                                         class="text-xs font-medium text-slate-500"
                                     >
-                                        Voting link
+                                        {translate(
+                                            $locale,
+                                            "workspace.votingLink",
+                                        )}
                                     </div>
 
                                     <div class="mt-2 flex items-center gap-2">
@@ -1157,8 +1179,14 @@
                                             class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
                                         >
                                             {copiedEntryId === entry.id
-                                                ? "Copied"
-                                                : "Copy"}
+                                                ? translate(
+                                                      $locale,
+                                                      "workspace.copied",
+                                                  )
+                                                : translate(
+                                                      $locale,
+                                                      "workspace.copy",
+                                                  )}
                                         </button>
                                     </div>
                                 </div>
@@ -1505,7 +1533,7 @@
         >
             <button
                 type="button"
-                aria-label="Close add entry dialog"
+                aria-label={translate($locale, "workspace.closeAddEntryDialog")}
                 disabled={entryBusy}
                 onclick={closeCreateEntry}
                 class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
@@ -1522,25 +1550,27 @@
                         <div
                             class="mb-3 inline-flex rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-xs font-medium text-violet-300"
                         >
-                            New contestant
+                            {translate($locale, "workspace.newContestant")}
                         </div>
 
                         <h2
                             id="create-entry-title"
                             class="text-2xl font-semibold tracking-tight"
                         >
-                            Add entry
+                            {translate($locale, "workspace.addEntry")}
                         </h2>
 
                         <p class="mt-2 leading-6 text-slate-400">
-                            The entry number and permanent voting link are
-                            assigned automatically.
+                            {translate(
+                                $locale,
+                                "workspace.addEntryDescription",
+                            )}
                         </p>
                     </div>
 
                     <button
                         type="button"
-                        aria-label="Close"
+                        aria-label={translate($locale, "admin.close")}
                         disabled={entryBusy}
                         onclick={closeCreateEntry}
                         class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-400 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
@@ -1552,14 +1582,17 @@
                 <form class="mt-7 space-y-5" onsubmit={handleCreateEntry}>
                     <label class="block">
                         <span class="text-sm font-medium text-slate-300">
-                            Entry name
+                            {translate($locale, "workspace.entryName")}
                         </span>
 
                         <input
                             bind:value={entryName}
                             type="text"
                             maxlength="120"
-                            placeholder="Málnás csokitorta"
+                            placeholder={translate(
+                                $locale,
+                                "workspace.entryNamePlaceholder",
+                            )}
                             required
                             class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3.5 text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-4 focus:ring-violet-400/10"
                         />
@@ -1567,14 +1600,17 @@
 
                     <label class="block">
                         <span class="text-sm font-medium text-slate-300">
-                            Description
+                            {translate($locale, "admin.description")}
                         </span>
 
                         <textarea
                             bind:value={entryDescription}
                             maxlength="2000"
                             rows="4"
-                            placeholder="Optional description…"
+                            placeholder={translate(
+                                $locale,
+                                "workspace.optionalDescriptionPlaceholder",
+                            )}
                             class="mt-2 w-full resize-none rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3.5 text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-4 focus:ring-violet-400/10"
                         ></textarea>
 
@@ -1600,7 +1636,7 @@
                             onclick={closeCreateEntry}
                             class="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
                         >
-                            Cancel
+                            {translate($locale, "admin.cancel")}
                         </button>
 
                         <button
@@ -1608,7 +1644,9 @@
                             disabled={entryBusy}
                             class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            {entryBusy ? "Adding…" : "Add entry"}
+                            {entryBusy
+                                ? translate($locale, "workspace.adding")
+                                : translate($locale, "workspace.addEntry")}
                         </button>
                     </div>
                 </form>
@@ -1622,7 +1660,10 @@
         >
             <button
                 type="button"
-                aria-label="Close edit entry dialog"
+                aria-label={translate(
+                    $locale,
+                    "workspace.closeEditEntryDialog",
+                )}
                 disabled={editEntryBusy}
                 onclick={closeEditEntry}
                 class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
@@ -1639,24 +1680,29 @@
                         <div
                             class="mb-3 inline-flex rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-xs font-medium text-violet-300"
                         >
-                            Entry #{editingEntry.number}
+                            {translate($locale, "entry.number", {
+                                number: editingEntry.number,
+                            })}
                         </div>
 
                         <h2
                             id="edit-entry-title"
                             class="text-2xl font-semibold tracking-tight"
                         >
-                            Edit entry
+                            {translate($locale, "workspace.editEntry")}
                         </h2>
 
                         <p class="mt-2 leading-6 text-slate-400">
-                            Update contestant details and its public image.
+                            {translate(
+                                $locale,
+                                "workspace.editEntryDescription",
+                            )}
                         </p>
                     </div>
 
                     <button
                         type="button"
-                        aria-label="Close"
+                        aria-label={translate($locale, "admin.close")}
                         disabled={editEntryBusy}
                         onclick={closeEditEntry}
                         class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-400 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
@@ -1668,7 +1714,7 @@
                 <form class="mt-7 space-y-5" onsubmit={handleEditEntry}>
                     <div>
                         <span class="text-sm font-medium text-slate-300">
-                            Entry image
+                            {translate($locale, "workspace.entryImage")}
                         </span>
 
                         <div
@@ -1678,7 +1724,10 @@
                                 {#if editEntryImagePreviewUrl !== null}
                                     <img
                                         src={editEntryImagePreviewUrl}
-                                        alt="Selected preview"
+                                        alt={translate(
+                                            $locale,
+                                            "workspace.selectedPreview",
+                                        )}
                                         class="h-full w-full object-cover"
                                     />
                                 {:else if editingEntry.image_url !== null}
@@ -1691,7 +1740,10 @@
                                     <div
                                         class="flex h-full items-center justify-center text-sm text-slate-600"
                                     >
-                                        No image yet
+                                        {translate(
+                                            $locale,
+                                            "workspace.noImageYet",
+                                        )}
                                     </div>
                                 {/if}
                             </div>
@@ -1704,19 +1756,28 @@
                                         class="text-sm font-medium text-slate-300"
                                     >
                                         {editingEntry.image_url !== null
-                                            ? "Replace image"
-                                            : "Choose image"}
+                                            ? translate(
+                                                  $locale,
+                                                  "workspace.replaceImage",
+                                              )
+                                            : translate(
+                                                  $locale,
+                                                  "workspace.chooseImage",
+                                              )}
                                     </div>
 
                                     <div class="mt-1 text-xs text-slate-600">
-                                        JPEG, PNG or WebP · max 8 MiB
+                                        {translate(
+                                            $locale,
+                                            "workspace.imageRequirements",
+                                        )}
                                     </div>
                                 </div>
 
                                 <span
                                     class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-slate-300"
                                 >
-                                    Browse
+                                    {translate($locale, "workspace.browse")}
                                 </span>
 
                                 <input
@@ -1731,15 +1792,16 @@
 
                         {#if editEntryImageFile !== null}
                             <div class="mt-2 text-xs text-slate-500">
-                                Selected:
-                                {editEntryImageFile.name}
+                                {translate($locale, "workspace.selectedFile", {
+                                    name: editEntryImageFile.name,
+                                })}
                             </div>
                         {/if}
                     </div>
 
                     <label class="block">
                         <span class="text-sm font-medium text-slate-300">
-                            Entry name
+                            {translate($locale, "workspace.entryName")}
                         </span>
 
                         <input
@@ -1753,7 +1815,7 @@
 
                     <label class="block">
                         <span class="text-sm font-medium text-slate-300">
-                            Description
+                            {translate($locale, "admin.description")}
                         </span>
 
                         <textarea
@@ -1770,7 +1832,10 @@
 
                     <div>
                         <span class="text-sm font-medium text-slate-300">
-                            Permanent voting link
+                            {translate(
+                                $locale,
+                                "workspace.permanentVotingLink",
+                            )}
                         </span>
 
                         <div
@@ -1797,7 +1862,7 @@
                             onclick={closeEditEntry}
                             class="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
                         >
-                            Cancel
+                            {translate($locale, "admin.cancel")}
                         </button>
 
                         <button
@@ -1805,7 +1870,9 @@
                             disabled={editEntryBusy}
                             class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            {editEntryBusy ? "Saving…" : "Save entry"}
+                            {editEntryBusy
+                                ? translate($locale, "workspace.saving")
+                                : translate($locale, "workspace.saveEntry")}
                         </button>
                     </div>
                 </form>
