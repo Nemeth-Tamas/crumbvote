@@ -1,0 +1,27 @@
+services:
+  crumbvote:
+    image: ${CRUMBVOTE_IMAGE:-ghcr.io/nemeth-tamas/crumbvote:latest}
+    container_name: crumbvote
+
+    restart: unless-stopped
+    init: true
+
+    ports:
+      - "${CRUMBVOTE_BIND_ADDRESS:-127.0.0.1}:${CRUMBVOTE_PORT:-3000}:3000"
+
+    environment:
+      CRUMBVOTE_SECURE_COOKIES: ${CRUMBVOTE_SECURE_COOKIES:-false}
+
+    volumes:
+      - "${CRUMBVOTE_DATA_DIRECTORY:-./data}:/data"
+
+    read_only: true
+
+    tmpfs:
+      - /tmp
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
