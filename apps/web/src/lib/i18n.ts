@@ -469,6 +469,42 @@ const hu = {
 
     'admin.manageEvent':
         'Esemény kezelése →',
+
+    'admin.newVotingEvent':
+        'Új szavazási esemény',
+
+    'admin.createEventDescription':
+        'Kezdd magával az eseménnyel. A nevezéseket és a szavazási beállításokat ezután adjuk hozzá.',
+
+    'admin.closeCreateEventDialog':
+        'Esemény létrehozása ablak bezárása',
+
+    'admin.close':
+        'Bezárás',
+
+    'admin.eventTitle':
+        'Esemény címe',
+
+    'admin.eventTitlePlaceholder':
+        'Tortaszépség 2026',
+
+    'admin.eventUrl':
+        'Esemény URL-je',
+
+    'admin.eventUrlHelp':
+        'Automatikusan létrejön a címből, de módosíthatod.',
+
+    'admin.description':
+        'Leírás',
+
+    'admin.descriptionPlaceholder':
+        'Írd le a látogatóknak, miről szól az esemény…',
+
+    'admin.cancel':
+        'Mégse',
+
+    'admin.creating':
+        'Létrehozás…',
 } as const
 
 export type TranslationKey =
@@ -931,6 +967,42 @@ const en: Record<
 
     'admin.manageEvent':
         'Manage event →',
+
+    'admin.newVotingEvent':
+        'New voting event',
+
+    'admin.createEventDescription':
+        "Start with the event itself. We'll add contestants and voting settings next.",
+
+    'admin.closeCreateEventDialog':
+        'Close create event dialog',
+
+    'admin.close':
+        'Close',
+
+    'admin.eventTitle':
+        'Event title',
+
+    'admin.eventTitlePlaceholder':
+        'Cake Beauty 2026',
+
+    'admin.eventUrl':
+        'Event URL',
+
+    'admin.eventUrlHelp':
+        'Generated automatically from the title, but you can edit it.',
+
+    'admin.description':
+        'Description',
+
+    'admin.descriptionPlaceholder':
+        'Tell visitors what this event is about…',
+
+    'admin.cancel':
+        'Cancel',
+
+    'admin.creating':
+        'Creating…',
 }
 
 const de: Record<
@@ -1390,6 +1462,42 @@ const de: Record<
 
     'admin.manageEvent':
         'Veranstaltung verwalten →',
+
+    'admin.newVotingEvent':
+        'Neue Abstimmung',
+
+    'admin.createEventDescription':
+        'Beginne mit der Veranstaltung selbst. Beiträge und Abstimmungseinstellungen fügen wir anschließend hinzu.',
+
+    'admin.closeCreateEventDialog':
+        'Dialog zum Erstellen einer Veranstaltung schließen',
+
+    'admin.close':
+        'Schließen',
+
+    'admin.eventTitle':
+        'Veranstaltungstitel',
+
+    'admin.eventTitlePlaceholder':
+        'Kuchen-Schönheit 2026',
+
+    'admin.eventUrl':
+        'Veranstaltungs-URL',
+
+    'admin.eventUrlHelp':
+        'Wird automatisch aus dem Titel erstellt, kann aber geändert werden.',
+
+    'admin.description':
+        'Beschreibung',
+
+    'admin.descriptionPlaceholder':
+        'Beschreibe für Besucher, worum es bei dieser Veranstaltung geht…',
+
+    'admin.cancel':
+        'Abbrechen',
+
+    'admin.creating':
+        'Wird erstellt…',
 }
 
 const translations: Record<

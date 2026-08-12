@@ -943,7 +943,7 @@
         >
             <button
                 type="button"
-                aria-label="Close create event dialog"
+                aria-label={translate($locale, "admin.closeCreateEventDialog")}
                 disabled={eventBusy}
                 onclick={closeCreateEvent}
                 class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
@@ -960,25 +960,24 @@
                         <div
                             class="mb-3 inline-flex rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-xs font-medium text-violet-300"
                         >
-                            New voting event
+                            {translate($locale, "admin.newVotingEvent")}
                         </div>
 
                         <h2
                             id="create-event-title"
                             class="text-2xl font-semibold tracking-tight"
                         >
-                            Create event
+                            {translate($locale, "admin.createEvent")}
                         </h2>
 
                         <p class="mt-2 leading-6 text-slate-400">
-                            Start with the event itself. We'll add contestants
-                            and voting settings next.
+                            {translate($locale, "admin.createEventDescription")}
                         </p>
                     </div>
 
                     <button
                         type="button"
-                        aria-label="Close"
+                        aria-label={translate($locale, "admin.close")}
                         disabled={eventBusy}
                         onclick={closeCreateEvent}
                         class="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-slate-400 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
@@ -990,7 +989,7 @@
                 <form class="mt-7 space-y-5" onsubmit={handleCreateEvent}>
                     <label class="block">
                         <span class="text-sm font-medium text-slate-300">
-                            Event title
+                            {translate($locale, "admin.eventTitle")}
                         </span>
 
                         <input
@@ -998,7 +997,10 @@
                             oninput={handleEventTitleInput}
                             type="text"
                             maxlength="120"
-                            placeholder="Cake Beauty 2026"
+                            placeholder={translate(
+                                $locale,
+                                "admin.eventTitlePlaceholder",
+                            )}
                             required
                             class="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3.5 text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-4 focus:ring-violet-400/10"
                         />
@@ -1006,7 +1008,7 @@
 
                     <label class="block">
                         <span class="text-sm font-medium text-slate-300">
-                            Event URL
+                            {translate($locale, "admin.eventUrl")}
                         </span>
 
                         <div
@@ -1031,21 +1033,23 @@
                         </div>
 
                         <span class="mt-2 block text-xs text-slate-600">
-                            Generated automatically from the title, but you can
-                            edit it.
+                            {translate($locale, "admin.eventUrlHelp")}
                         </span>
                     </label>
 
                     <label class="block">
                         <span class="text-sm font-medium text-slate-300">
-                            Description
+                            {translate($locale, "admin.description")}
                         </span>
 
                         <textarea
                             bind:value={eventDescription}
                             maxlength="2000"
                             rows="4"
-                            placeholder="Tell visitors what this event is about…"
+                            placeholder={translate(
+                                $locale,
+                                "admin.descriptionPlaceholder",
+                            )}
                             class="mt-2 w-full resize-none rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3.5 text-white outline-none transition placeholder:text-slate-700 focus:border-violet-400/50 focus:ring-4 focus:ring-violet-400/10"
                         ></textarea>
 
@@ -1071,7 +1075,7 @@
                             onclick={closeCreateEvent}
                             class="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            Cancel
+                            {translate($locale, "admin.cancel")}
                         </button>
 
                         <button
@@ -1079,7 +1083,9 @@
                             disabled={eventBusy}
                             class="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-950/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            {eventBusy ? "Creating…" : "Create event"}
+                            {eventBusy
+                                ? translate($locale, "admin.creating")
+                                : translate($locale, "admin.createEvent")}
                         </button>
                     </div>
                 </form>
