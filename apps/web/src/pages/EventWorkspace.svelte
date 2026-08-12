@@ -15,6 +15,7 @@
         type EntryAnalytics,
         type EventStatus,
     } from "../lib/api";
+    import { locale, translate, type TranslationKey } from "../lib/i18n";
 
     export let eventId: number;
     export let onSessionExpired: () => void;
@@ -110,7 +111,7 @@
 
             applyEvent(updated);
 
-            successMessage = "Changes saved.";
+            successMessage = translate($locale, "workspace.changesSaved");
         } catch (error) {
             handleError(error);
         } finally {
@@ -219,12 +220,18 @@
         }
 
         if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-            editEntryErrorMessage = "Choose a JPEG, PNG or WebP image.";
+            editEntryErrorMessage = translate(
+                $locale,
+                "workspace.errorUnsupportedImageType",
+            );
             return;
         }
 
         if (file.size > 8 * 1024 * 1024) {
-            editEntryErrorMessage = "The image must be 8 MiB or smaller.";
+            editEntryErrorMessage = translate(
+                $locale,
+                "workspace.errorImageTooLarge",
+            );
             return;
         }
 
@@ -310,7 +317,7 @@
                 }
             }, 1500);
         } catch {
-            entryErrorMessage = "The voting link could not be copied.";
+            entryErrorMessage = translate($locale, "workspace.errorCopyLink");
         }
     }
 
@@ -328,69 +335,71 @@
 
     function describeError(error: unknown): string {
         if (!(error instanceof ApiError)) {
-            return "CrumbVote could not reach the server.";
+            return translate($locale, "workspace.errorNetwork");
         }
 
-        const messages: Record<string, string> = {
-            event_not_found: "This event no longer exists.",
+        const messages: Record<string, TranslationKey> = {
+            event_not_found: "workspace.errorEventNotFound",
 
-            title_required: "Give the event a title.",
+            title_required: "admin.errorTitleRequired",
 
-            title_too_long: "The event title is too long.",
+            title_too_long: "admin.errorTitleTooLong",
 
-            description_too_long: "The event description is too long.",
+            description_too_long: "admin.errorDescriptionTooLong",
 
-            invalid_event_status:
-                "CrumbVote rejected the requested event status.",
+            invalid_event_status: "workspace.errorInvalidEventStatus",
 
-            invalid_status_transition:
-                "That event status transition is not allowed.",
+            invalid_status_transition: "workspace.errorInvalidStatusTransition",
 
-            database_error: "CrumbVote could not access its database.",
+            database_error: "admin.errorDatabase",
 
-            entry_name_required: "Give the entry a name.",
+            entry_name_required: "workspace.errorEntryNameRequired",
 
-            entry_name_too_long: "The entry name is too long.",
+            entry_name_too_long: "workspace.errorEntryNameTooLong",
 
-            entry_description_too_long: "The entry description is too long.",
+            entry_description_too_long:
+                "workspace.errorEntryDescriptionTooLong",
 
-            event_entries_locked:
-                "Entries are locked after voting has been opened.",
+            event_entries_locked: "workspace.errorEntriesLocked",
 
-            entry_not_found: "That entry no longer exists.",
+            entry_not_found: "workspace.errorEntryNotFound",
 
-            unsupported_image_type: "Choose a JPEG, PNG or WebP image.",
+            unsupported_image_type: "workspace.errorUnsupportedImageType",
 
-            image_too_large: "The image must be 8 MiB or smaller.",
+            image_too_large: "workspace.errorImageTooLarge",
 
-            image_empty: "The selected image is empty.",
+            image_empty: "workspace.errorImageEmpty",
 
-            image_required: "Choose an image to upload.",
+            image_required: "workspace.errorImageRequired",
 
-            invalid_image_upload: "CrumbVote could not read that image upload.",
+            invalid_image_upload: "workspace.errorInvalidImageUpload",
 
-            invalid_image_data:
-                "The uploaded file does not appear to be a valid image.",
+            invalid_image_data: "workspace.errorInvalidImageData",
 
-            image_storage_error: "CrumbVote could not store the image.",
+            image_storage_error: "workspace.errorImageStorage",
         };
 
-        return (
-            messages[error.code] ??
-            `The request failed with error "${error.code}".`
-        );
+        const key = messages[error.code];
+
+        if (key !== undefined) {
+            return translate($locale, key);
+        }
+
+        return translate($locale, "common.requestFailed", {
+            code: error.code,
+        });
     }
 
     function statusLabel(status: EventStatus): string {
         switch (status) {
             case "draft":
-                return "Draft";
+                return translate($locale, "admin.statusDraft");
 
             case "open":
-                return "Open";
+                return translate($locale, "admin.statusOpen");
 
             case "closed":
-                return "Closed";
+                return translate($locale, "admin.statusClosed");
         }
     }
 
@@ -583,10 +592,12 @@
                 class="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-white/10 border-t-violet-400"
             ></div>
 
-            <div class="mt-5 font-medium">Loading event…</div>
+            <div class="mt-5 font-medium">
+                {translate($locale, "workspace.loading")}
+            </div>
 
             <div class="mt-2 text-sm text-slate-500">
-                Fetching event settings.
+                {translate($locale, "workspace.loadingDescription")}
             </div>
         </div>
     </section>
@@ -601,7 +612,9 @@
                 !
             </div>
 
-            <h1 class="mt-5 text-2xl font-semibold">Couldn't load event</h1>
+            <h1 class="mt-5 text-2xl font-semibold">
+                {translate($locale, "workspace.loadErrorTitle")}
+            </h1>
 
             <p class="mt-3 leading-7 text-slate-400">
                 {errorMessage}
@@ -611,7 +624,7 @@
                 href="/admin"
                 class="mt-6 inline-flex rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
             >
-                Back to events
+                {translate($locale, "workspace.backToEvents")}
             </a>
         </div>
     </section>
@@ -622,11 +635,13 @@
                 href="/admin"
                 class="inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-white"
             >
-                ← Back to events
+                ← {translate($locale, "workspace.backToEvents")}
             </a>
 
             <div class="text-xs text-slate-600">
-                Event #{event.id}
+                {translate($locale, "workspace.eventNumber", {
+                    number: event.id,
+                })}
             </div>
         </div>
 
@@ -646,7 +661,7 @@
                                     class="h-1.5 w-1.5 rounded-full bg-emerald-400"
                                 ></span>
 
-                                Open
+                                {translate($locale, "admin.statusOpen")}
                             </span>
                         {:else if event.status === "closed"}
                             <span
@@ -656,7 +671,7 @@
                                     class="h-1.5 w-1.5 rounded-full bg-slate-400"
                                 ></span>
 
-                                Closed
+                                {translate($locale, "admin.statusClosed")}
                             </span>
                         {:else}
                             <span
@@ -666,7 +681,7 @@
                                     class="h-1.5 w-1.5 rounded-full bg-violet-400"
                                 ></span>
 
-                                Draft
+                                {translate($locale, "admin.statusDraft")}
                             </span>
                         {/if}
 
@@ -682,7 +697,8 @@
                     </h1>
 
                     <p class="mt-3 max-w-3xl leading-7 text-slate-400">
-                        {event.description ?? "No description yet."}
+                        {event.description ??
+                            translate($locale, "admin.noDescription")}
                     </p>
                 </div>
 
@@ -694,7 +710,7 @@
                             onclick={() => void handleStatusChange("open")}
                             class="rounded-xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            Open voting
+                            {translate($locale, "workspace.openVoting")}
                         </button>
                     {:else if event.status === "open"}
                         <button
@@ -703,7 +719,7 @@
                             onclick={() => void handleStatusChange("closed")}
                             class="rounded-xl bg-amber-300 px-5 py-3 text-sm font-semibold text-amber-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            Close voting
+                            {translate($locale, "workspace.closeVoting")}
                         </button>
                     {:else}
                         <button
@@ -712,7 +728,7 @@
                             onclick={() => void handleStatusChange("open")}
                             class="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-5 py-3 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            Reopen voting
+                            {translate($locale, "workspace.reopenVoting")}
                         </button>
                     {/if}
                 </div>
@@ -811,17 +827,22 @@
                 class="rounded-[2rem] border border-white/10 bg-white/[0.025] p-6 sm:p-8"
             >
                 <div>
-                    <h2 class="text-xl font-semibold">Event settings</h2>
+                    <h2 class="text-xl font-semibold">
+                        {translate($locale, "workspace.eventSettings")}
+                    </h2>
 
                     <p class="mt-1 text-sm text-slate-500">
-                        Basic information and result visibility.
+                        {translate(
+                            $locale,
+                            "workspace.eventSettingsDescription",
+                        )}
                     </p>
                 </div>
 
                 <div class="mt-7 space-y-6">
                     <label class="block">
                         <span class="text-sm font-medium text-slate-300">
-                            Event title
+                            {translate($locale, "admin.eventTitle")}
                         </span>
 
                         <input
@@ -835,7 +856,7 @@
 
                     <label class="block">
                         <span class="text-sm font-medium text-slate-300">
-                            Description
+                            {translate($locale, "admin.description")}
                         </span>
 
                         <textarea
@@ -852,7 +873,7 @@
 
                     <div>
                         <span class="text-sm font-medium text-slate-300">
-                            Event URL
+                            {translate($locale, "admin.eventUrl")}
                         </span>
 
                         <div
@@ -862,8 +883,7 @@
                         </div>
 
                         <p class="mt-2 text-xs leading-5 text-slate-600">
-                            The event slug is permanent after creation so
-                            printed QR codes cannot be accidentally broken.
+                            {translate($locale, "workspace.eventUrlPermanent")}
                         </p>
                     </div>
 
@@ -872,14 +892,16 @@
                     >
                         <div>
                             <div class="font-medium text-slate-200">
-                                Public results
+                                {translate($locale, "workspace.publicResults")}
                             </div>
 
                             <div
                                 class="mt-1 max-w-md text-sm leading-6 text-slate-500"
                             >
-                                Allow visitors to see voting results when the
-                                public results page is available.
+                                {translate(
+                                    $locale,
+                                    "workspace.publicResultsDescription",
+                                )}
                             </div>
                         </div>
 
@@ -912,7 +934,9 @@
                             disabled={busy}
                             class="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            {busy ? "Saving…" : "Save changes"}
+                            {busy
+                                ? translate($locale, "workspace.saving")
+                                : translate($locale, "workspace.saveChanges")}
                         </button>
                     </div>
                 </div>
@@ -922,7 +946,9 @@
                 <article
                     class="rounded-[2rem] border border-white/10 bg-white/[0.025] p-6"
                 >
-                    <div class="text-sm text-slate-500">Voting status</div>
+                    <div class="text-sm text-slate-500">
+                        {translate($locale, "workspace.votingStatus")}
+                    </div>
 
                     <div class="mt-3 text-2xl font-semibold">
                         {statusLabel(event.status)}
@@ -930,11 +956,20 @@
 
                     <p class="mt-2 text-sm leading-6 text-slate-500">
                         {#if event.status === "draft"}
-                            Voting has not been opened yet.
+                            {translate(
+                                $locale,
+                                "workspace.statusDraftDescription",
+                            )}
                         {:else if event.status === "open"}
-                            Visitors can vote while this event is open.
+                            {translate(
+                                $locale,
+                                "workspace.statusOpenDescription",
+                            )}
                         {:else}
-                            Voting is currently closed.
+                            {translate(
+                                $locale,
+                                "workspace.statusClosedDescription",
+                            )}
                         {/if}
                     </p>
                 </article>
@@ -970,10 +1005,18 @@
                 <article
                     class="rounded-[2rem] border border-white/10 bg-white/[0.025] p-6"
                 >
-                    <div class="text-sm text-slate-500">Last updated</div>
+                    <div class="text-sm text-slate-500">
+                        {translate($locale, "workspace.lastUpdated")}
+                    </div>
 
                     <div class="mt-3 text-sm font-medium text-slate-300">
-                        {new Date(event.updated_at * 1000).toLocaleString()}
+                        {new Date(event.updated_at * 1000).toLocaleString(
+                            $locale === "hu"
+                                ? "hu-HU"
+                                : $locale === "de"
+                                  ? "de-DE"
+                                  : "en-US",
+                        )}
                     </div>
                 </article>
             </div>

@@ -505,6 +505,120 @@ const hu = {
 
     'admin.creating':
         'Létrehozás…',
+
+    'workspace.changesSaved':
+        'Módosítások mentve.',
+
+    'workspace.loading':
+        'Esemény betöltése…',
+
+    'workspace.loadingDescription':
+        'Eseménybeállítások betöltése.',
+
+    'workspace.loadErrorTitle':
+        'Az esemény nem tölthető be',
+
+    'workspace.backToEvents':
+        'Vissza az eseményekhez',
+
+    'workspace.eventNumber':
+        'Esemény #{number}',
+
+    'workspace.openVoting':
+        'Szavazás megnyitása',
+
+    'workspace.closeVoting':
+        'Szavazás lezárása',
+
+    'workspace.reopenVoting':
+        'Szavazás újranyitása',
+
+    'workspace.eventSettings':
+        'Eseménybeállítások',
+
+    'workspace.eventSettingsDescription':
+        'Alapadatok és az eredmények láthatósága.',
+
+    'workspace.eventUrlPermanent':
+        'Az esemény URL-azonosítója a létrehozás után végleges, így a kinyomtatott QR-kódok nem törhetnek el véletlenül.',
+
+    'workspace.publicResults':
+        'Nyilvános eredmények',
+
+    'workspace.publicResultsDescription':
+        'Engedélyezd, hogy a látogatók megtekinthessék a szavazás eredményeit, amikor a nyilvános eredményoldal elérhető.',
+
+    'workspace.saving':
+        'Mentés…',
+
+    'workspace.saveChanges':
+        'Módosítások mentése',
+
+    'workspace.votingStatus':
+        'Szavazás állapota',
+
+    'workspace.statusDraftDescription':
+        'A szavazás még nem lett megnyitva.',
+
+    'workspace.statusOpenDescription':
+        'A látogatók szavazhatnak, amíg az esemény nyitva van.',
+
+    'workspace.statusClosedDescription':
+        'A szavazás jelenleg le van zárva.',
+
+    'workspace.lastUpdated':
+        'Utolsó módosítás',
+
+    'workspace.errorNetwork':
+        'A CrumbVote nem éri el a szervert.',
+
+    'workspace.errorEventNotFound':
+        'Ez az esemény már nem létezik.',
+
+    'workspace.errorInvalidEventStatus':
+        'A CrumbVote elutasította a kért eseményállapotot.',
+
+    'workspace.errorInvalidStatusTransition':
+        'Ez az eseményállapot-váltás nem engedélyezett.',
+
+    'workspace.errorEntryNameRequired':
+        'Adj nevet a nevezésnek.',
+
+    'workspace.errorEntryNameTooLong':
+        'A nevezés neve túl hosszú.',
+
+    'workspace.errorEntryDescriptionTooLong':
+        'A nevezés leírása túl hosszú.',
+
+    'workspace.errorEntriesLocked':
+        'A nevezések a szavazás megnyitása után zárolva vannak.',
+
+    'workspace.errorEntryNotFound':
+        'Ez a nevezés már nem létezik.',
+
+    'workspace.errorUnsupportedImageType':
+        'Válassz JPEG, PNG vagy WebP képet.',
+
+    'workspace.errorImageTooLarge':
+        'A kép legfeljebb 8 MiB lehet.',
+
+    'workspace.errorImageEmpty':
+        'A kiválasztott kép üres.',
+
+    'workspace.errorImageRequired':
+        'Válassz feltöltendő képet.',
+
+    'workspace.errorInvalidImageUpload':
+        'A CrumbVote nem tudta beolvasni a képfeltöltést.',
+
+    'workspace.errorInvalidImageData':
+        'A feltöltött fájl nem tűnik érvényes képnek.',
+
+    'workspace.errorImageStorage':
+        'A CrumbVote nem tudta eltárolni a képet.',
+
+    'workspace.errorCopyLink':
+        'A szavazási linket nem sikerült másolni.',
 } as const
 
 export type TranslationKey =
@@ -1003,6 +1117,120 @@ const en: Record<
 
     'admin.creating':
         'Creating…',
+
+    'workspace.changesSaved':
+        'Changes saved.',
+
+    'workspace.loading':
+        'Loading event…',
+
+    'workspace.loadingDescription':
+        'Fetching event settings.',
+
+    'workspace.loadErrorTitle':
+        "Couldn't load event",
+
+    'workspace.backToEvents':
+        'Back to events',
+
+    'workspace.eventNumber':
+        'Event #{number}',
+
+    'workspace.openVoting':
+        'Open voting',
+
+    'workspace.closeVoting':
+        'Close voting',
+
+    'workspace.reopenVoting':
+        'Reopen voting',
+
+    'workspace.eventSettings':
+        'Event settings',
+
+    'workspace.eventSettingsDescription':
+        'Basic information and result visibility.',
+
+    'workspace.eventUrlPermanent':
+        'The event slug is permanent after creation so printed QR codes cannot be accidentally broken.',
+
+    'workspace.publicResults':
+        'Public results',
+
+    'workspace.publicResultsDescription':
+        'Allow visitors to see voting results when the public results page is available.',
+
+    'workspace.saving':
+        'Saving…',
+
+    'workspace.saveChanges':
+        'Save changes',
+
+    'workspace.votingStatus':
+        'Voting status',
+
+    'workspace.statusDraftDescription':
+        'Voting has not been opened yet.',
+
+    'workspace.statusOpenDescription':
+        'Visitors can vote while this event is open.',
+
+    'workspace.statusClosedDescription':
+        'Voting is currently closed.',
+
+    'workspace.lastUpdated':
+        'Last updated',
+
+    'workspace.errorNetwork':
+        'CrumbVote could not reach the server.',
+
+    'workspace.errorEventNotFound':
+        'This event no longer exists.',
+
+    'workspace.errorInvalidEventStatus':
+        'CrumbVote rejected the requested event status.',
+
+    'workspace.errorInvalidStatusTransition':
+        'That event status transition is not allowed.',
+
+    'workspace.errorEntryNameRequired':
+        'Give the entry a name.',
+
+    'workspace.errorEntryNameTooLong':
+        'The entry name is too long.',
+
+    'workspace.errorEntryDescriptionTooLong':
+        'The entry description is too long.',
+
+    'workspace.errorEntriesLocked':
+        'Entries are locked after voting has been opened.',
+
+    'workspace.errorEntryNotFound':
+        'That entry no longer exists.',
+
+    'workspace.errorUnsupportedImageType':
+        'Choose a JPEG, PNG or WebP image.',
+
+    'workspace.errorImageTooLarge':
+        'The image must be 8 MiB or smaller.',
+
+    'workspace.errorImageEmpty':
+        'The selected image is empty.',
+
+    'workspace.errorImageRequired':
+        'Choose an image to upload.',
+
+    'workspace.errorInvalidImageUpload':
+        'CrumbVote could not read that image upload.',
+
+    'workspace.errorInvalidImageData':
+        'The uploaded file does not appear to be a valid image.',
+
+    'workspace.errorImageStorage':
+        'CrumbVote could not store the image.',
+
+    'workspace.errorCopyLink':
+        'The voting link could not be copied.',
 }
 
 const de: Record<
@@ -1498,6 +1726,120 @@ const de: Record<
 
     'admin.creating':
         'Wird erstellt…',
+
+    'workspace.changesSaved':
+        'Änderungen gespeichert.',
+
+    'workspace.loading':
+        'Veranstaltung wird geladen…',
+
+    'workspace.loadingDescription':
+        'Veranstaltungseinstellungen werden geladen.',
+
+    'workspace.loadErrorTitle':
+        'Veranstaltung konnte nicht geladen werden',
+
+    'workspace.backToEvents':
+        'Zurück zu den Veranstaltungen',
+
+    'workspace.eventNumber':
+        'Veranstaltung #{number}',
+
+    'workspace.openVoting':
+        'Abstimmung öffnen',
+
+    'workspace.closeVoting':
+        'Abstimmung schließen',
+
+    'workspace.reopenVoting':
+        'Abstimmung erneut öffnen',
+
+    'workspace.eventSettings':
+        'Veranstaltungseinstellungen',
+
+    'workspace.eventSettingsDescription':
+        'Grundlegende Informationen und Sichtbarkeit der Ergebnisse.',
+
+    'workspace.eventUrlPermanent':
+        'Die URL-Kennung der Veranstaltung ist nach der Erstellung dauerhaft, damit gedruckte QR-Codes nicht versehentlich ungültig werden.',
+
+    'workspace.publicResults':
+        'Öffentliche Ergebnisse',
+
+    'workspace.publicResultsDescription':
+        'Erlaube Besuchern, die Abstimmungsergebnisse zu sehen, wenn die öffentliche Ergebnisseite verfügbar ist.',
+
+    'workspace.saving':
+        'Speichern…',
+
+    'workspace.saveChanges':
+        'Änderungen speichern',
+
+    'workspace.votingStatus':
+        'Abstimmungsstatus',
+
+    'workspace.statusDraftDescription':
+        'Die Abstimmung wurde noch nicht geöffnet.',
+
+    'workspace.statusOpenDescription':
+        'Besucher können abstimmen, solange die Veranstaltung geöffnet ist.',
+
+    'workspace.statusClosedDescription':
+        'Die Abstimmung ist derzeit geschlossen.',
+
+    'workspace.lastUpdated':
+        'Zuletzt aktualisiert',
+
+    'workspace.errorNetwork':
+        'CrumbVote konnte den Server nicht erreichen.',
+
+    'workspace.errorEventNotFound':
+        'Diese Veranstaltung existiert nicht mehr.',
+
+    'workspace.errorInvalidEventStatus':
+        'CrumbVote hat den angeforderten Veranstaltungsstatus abgelehnt.',
+
+    'workspace.errorInvalidStatusTransition':
+        'Dieser Wechsel des Veranstaltungsstatus ist nicht erlaubt.',
+
+    'workspace.errorEntryNameRequired':
+        'Gib dem Beitrag einen Namen.',
+
+    'workspace.errorEntryNameTooLong':
+        'Der Name des Beitrags ist zu lang.',
+
+    'workspace.errorEntryDescriptionTooLong':
+        'Die Beschreibung des Beitrags ist zu lang.',
+
+    'workspace.errorEntriesLocked':
+        'Beiträge sind gesperrt, nachdem die Abstimmung geöffnet wurde.',
+
+    'workspace.errorEntryNotFound':
+        'Dieser Beitrag existiert nicht mehr.',
+
+    'workspace.errorUnsupportedImageType':
+        'Wähle ein JPEG-, PNG- oder WebP-Bild.',
+
+    'workspace.errorImageTooLarge':
+        'Das Bild darf höchstens 8 MiB groß sein.',
+
+    'workspace.errorImageEmpty':
+        'Das ausgewählte Bild ist leer.',
+
+    'workspace.errorImageRequired':
+        'Wähle ein Bild zum Hochladen.',
+
+    'workspace.errorInvalidImageUpload':
+        'CrumbVote konnte den Bild-Upload nicht lesen.',
+
+    'workspace.errorInvalidImageData':
+        'Die hochgeladene Datei scheint kein gültiges Bild zu sein.',
+
+    'workspace.errorImageStorage':
+        'CrumbVote konnte das Bild nicht speichern.',
+
+    'workspace.errorCopyLink':
+        'Der Abstimmungslink konnte nicht kopiert werden.',
 }
 
 const translations: Record<
