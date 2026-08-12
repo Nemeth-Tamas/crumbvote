@@ -715,6 +715,111 @@ const hu = {
 
     'workspace.saveEntry':
         'Nevezés mentése',
+
+    'analytics.title':
+        'Statisztikák',
+
+    'analytics.liveDescription':
+        'Az eseményhez rögzített élő aktivitás.',
+
+    'analytics.scansOpens':
+        'Beolvasások / megnyitások',
+
+    'analytics.uniqueVisitors':
+        'Egyedi látogatók',
+
+    'analytics.currentVotes':
+        'Aktuális szavazatok',
+
+    'analytics.conversion':
+        'Konverzió',
+
+    'analytics.voteChanges':
+        'Szavazatmódosítások',
+
+    'analytics.intelligence':
+        'Eseményelemzés',
+
+    'analytics.analyse':
+        'Elemzés',
+
+    'analytics.analyseDescription':
+        'Nevezések teljesítménye, legutóbbi aktivitás és egyszerű jelzések, amelyeket érdemes lehet átnézni.',
+
+    'analytics.exportCsv':
+        'CSV exportálása',
+
+    'analytics.entryPerformance':
+        'Nevezések teljesítménye',
+
+    'analytics.entryPerformanceDescription':
+        'Rangsorolás az aktuális szavazatok, majd a látogatók és megnyitások alapján.',
+
+    'analytics.noEntries':
+        'Még nincs elemezhető nevezés.',
+
+    'analytics.entryId':
+        'Nevezés #{id}',
+
+    'analytics.voteShare':
+        'Szavazatarány',
+
+    'analytics.scans':
+        'Megnyitások',
+
+    'analytics.visitors':
+        'Látogatók',
+
+    'analytics.reviewSignals':
+        'Felülvizsgálati jelzések',
+
+    'analytics.reviewSignalsDescription':
+        'Csak heurisztikák — nem bizonyítják a visszaélést.',
+
+    'analytics.noSignals':
+        'Nincs szokatlan aktivitásra utaló jelzés.',
+
+    'analytics.noSignalsDescription':
+        'Jelenleg semmi sem lépi át a felülvizsgálati küszöbértékeket.',
+
+    'analytics.visitorOne':
+        '{count} látogató',
+
+    'analytics.visitorMany':
+        '{count} látogató',
+
+    'analytics.signalRepeatedScanning':
+        'Ismételt megnyitások',
+
+    'analytics.signalRepeatedScanningDescription':
+        'Egy vagy több böngészőazonosító szokatlanul sokszor nyitott meg nevezéseket.',
+
+    'analytics.signalFrequentVoteChanges':
+        'Gyakori szavazatmódosítás',
+
+    'analytics.signalFrequentVoteChangesDescription':
+        'Egy vagy több böngészőazonosító ismételten módosította a szavazatát.',
+
+    'analytics.signalDefaultDescription':
+        'Ezt az aktivitást érdemes lehet átnézni.',
+
+    'analytics.recentActivity':
+        'Legutóbbi aktivitás',
+
+    'analytics.recentActivityDescription':
+        'A legutóbbi megnyitások és szavazási műveletek.',
+
+    'analytics.noRecentActivity':
+        'Még nincs nyilvános aktivitás.',
+
+    'analytics.activityScan':
+        'Beolvasás / megnyitás',
+
+    'analytics.activityVote':
+        'Szavazat rögzítve',
+
+    'analytics.activityVoteChange':
+        'Szavazat módosítva',
 } as const
 
 export type TranslationKey =
@@ -1423,6 +1528,111 @@ const en: Record<
 
     'workspace.saveEntry':
         'Save entry',
+
+    'analytics.title':
+        'Analytics',
+
+    'analytics.liveDescription':
+        'Live activity collected for this event.',
+
+    'analytics.scansOpens':
+        'Scans / opens',
+
+    'analytics.uniqueVisitors':
+        'Unique visitors',
+
+    'analytics.currentVotes':
+        'Current votes',
+
+    'analytics.conversion':
+        'Conversion',
+
+    'analytics.voteChanges':
+        'Vote changes',
+
+    'analytics.intelligence':
+        'Event intelligence',
+
+    'analytics.analyse':
+        'Analyse',
+
+    'analytics.analyseDescription':
+        'Entry performance, recent activity and lightweight signals that may be worth reviewing.',
+
+    'analytics.exportCsv':
+        'Export CSV',
+
+    'analytics.entryPerformance':
+        'Entry performance',
+
+    'analytics.entryPerformanceDescription':
+        'Ranked by current votes, then visitors and scans.',
+
+    'analytics.noEntries':
+        'No entries to analyse yet.',
+
+    'analytics.entryId':
+        'Entry #{id}',
+
+    'analytics.voteShare':
+        'Vote share',
+
+    'analytics.scans':
+        'Scans',
+
+    'analytics.visitors':
+        'Visitors',
+
+    'analytics.reviewSignals':
+        'Review signals',
+
+    'analytics.reviewSignalsDescription':
+        'Heuristics only — not proof of abuse.',
+
+    'analytics.noSignals':
+        'No unusual activity signals.',
+
+    'analytics.noSignalsDescription':
+        'Nothing currently crosses the review thresholds.',
+
+    'analytics.visitorOne':
+        '{count} visitor',
+
+    'analytics.visitorMany':
+        '{count} visitors',
+
+    'analytics.signalRepeatedScanning':
+        'Repeated scanning',
+
+    'analytics.signalRepeatedScanningDescription':
+        'One or more browser identities opened entries unusually often.',
+
+    'analytics.signalFrequentVoteChanges':
+        'Frequent vote changes',
+
+    'analytics.signalFrequentVoteChangesDescription':
+        'One or more browser identities changed their vote repeatedly.',
+
+    'analytics.signalDefaultDescription':
+        'This activity may be worth reviewing.',
+
+    'analytics.recentActivity':
+        'Recent activity',
+
+    'analytics.recentActivityDescription':
+        'Latest scans and voting actions.',
+
+    'analytics.noRecentActivity':
+        'No public activity yet.',
+
+    'analytics.activityScan':
+        'Scan / open',
+
+    'analytics.activityVote':
+        'Vote recorded',
+
+    'analytics.activityVoteChange':
+        'Vote changed',
 }
 
 const de: Record<
@@ -2128,6 +2338,111 @@ const de: Record<
 
     'workspace.saveEntry':
         'Beitrag speichern',
+
+    'analytics.title':
+        'Statistiken',
+
+    'analytics.liveDescription':
+        'Live-Aktivität, die für diese Veranstaltung erfasst wurde.',
+
+    'analytics.scansOpens':
+        'Scans / Aufrufe',
+
+    'analytics.uniqueVisitors':
+        'Eindeutige Besucher',
+
+    'analytics.currentVotes':
+        'Aktuelle Stimmen',
+
+    'analytics.conversion':
+        'Konversion',
+
+    'analytics.voteChanges':
+        'Stimmenänderungen',
+
+    'analytics.intelligence':
+        'Veranstaltungsanalyse',
+
+    'analytics.analyse':
+        'Analyse',
+
+    'analytics.analyseDescription':
+        'Leistung der Beiträge, aktuelle Aktivitäten und einfache Hinweise, die eine Überprüfung wert sein können.',
+
+    'analytics.exportCsv':
+        'CSV exportieren',
+
+    'analytics.entryPerformance':
+        'Leistung der Beiträge',
+
+    'analytics.entryPerformanceDescription':
+        'Sortiert nach aktuellen Stimmen, danach Besuchern und Aufrufen.',
+
+    'analytics.noEntries':
+        'Noch keine Beiträge zum Analysieren vorhanden.',
+
+    'analytics.entryId':
+        'Beitrag #{id}',
+
+    'analytics.voteShare':
+        'Stimmenanteil',
+
+    'analytics.scans':
+        'Aufrufe',
+
+    'analytics.visitors':
+        'Besucher',
+
+    'analytics.reviewSignals':
+        'Prüfhinweise',
+
+    'analytics.reviewSignalsDescription':
+        'Nur Heuristiken — kein Beweis für Missbrauch.',
+
+    'analytics.noSignals':
+        'Keine Hinweise auf ungewöhnliche Aktivitäten.',
+
+    'analytics.noSignalsDescription':
+        'Derzeit überschreitet nichts die Schwellenwerte für eine Überprüfung.',
+
+    'analytics.visitorOne':
+        '{count} Besucher',
+
+    'analytics.visitorMany':
+        '{count} Besucher',
+
+    'analytics.signalRepeatedScanning':
+        'Wiederholte Aufrufe',
+
+    'analytics.signalRepeatedScanningDescription':
+        'Eine oder mehrere Browserkennungen haben Beiträge ungewöhnlich häufig geöffnet.',
+
+    'analytics.signalFrequentVoteChanges':
+        'Häufige Stimmenänderungen',
+
+    'analytics.signalFrequentVoteChangesDescription':
+        'Eine oder mehrere Browserkennungen haben ihre Stimme wiederholt geändert.',
+
+    'analytics.signalDefaultDescription':
+        'Diese Aktivität könnte eine Überprüfung wert sein.',
+
+    'analytics.recentActivity':
+        'Letzte Aktivitäten',
+
+    'analytics.recentActivityDescription':
+        'Die letzten Aufrufe und Abstimmungsaktionen.',
+
+    'analytics.noRecentActivity':
+        'Noch keine öffentliche Aktivität.',
+
+    'analytics.activityScan':
+        'Scan / Aufruf',
+
+    'analytics.activityVote':
+        'Stimme abgegeben',
+
+    'analytics.activityVoteChange':
+        'Stimme geändert',
 }
 
 const translations: Record<

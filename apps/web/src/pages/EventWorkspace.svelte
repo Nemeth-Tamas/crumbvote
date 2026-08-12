@@ -473,13 +473,13 @@
     function activityKindLabel(kind: string): string {
         switch (kind) {
             case "scan":
-                return "Scan / open";
+                return translate($locale, "analytics.activityScan");
 
             case "vote":
-                return "Vote recorded";
+                return translate($locale, "analytics.activityVote");
 
             case "vote_change":
-                return "Vote changed";
+                return translate($locale, "analytics.activityVoteChange");
 
             default:
                 return kind;
@@ -490,7 +490,9 @@
         const entry = entries.find((candidate) => candidate.id === entryId);
 
         if (entry === undefined) {
-            return `Entry ${entryId}`;
+            return translate($locale, "analytics.entryId", {
+                id: entryId,
+            });
         }
 
         return `#${entry.number} ${entry.name}`;
@@ -499,10 +501,13 @@
     function signalLabel(code: string): string {
         switch (code) {
             case "high_scan_repeaters":
-                return "Repeated scanning";
+                return translate($locale, "analytics.signalRepeatedScanning");
 
             case "frequent_vote_changers":
-                return "Frequent vote changes";
+                return translate(
+                    $locale,
+                    "analytics.signalFrequentVoteChanges",
+                );
 
             default:
                 return code;
@@ -512,13 +517,19 @@
     function signalDescription(code: string): string {
         switch (code) {
             case "high_scan_repeaters":
-                return "One or more browser identities opened entries unusually often.";
+                return translate(
+                    $locale,
+                    "analytics.signalRepeatedScanningDescription",
+                );
 
             case "frequent_vote_changers":
-                return "One or more browser identities changed their vote repeatedly.";
+                return translate(
+                    $locale,
+                    "analytics.signalFrequentVoteChangesDescription",
+                );
 
             default:
-                return "This activity may be worth reviewing.";
+                return translate($locale, "analytics.signalDefaultDescription");
         }
     }
 
@@ -739,10 +750,12 @@
             <section data-testid="analytics-summary" class="mt-6">
                 <div class="mb-4 flex items-end justify-between gap-4">
                     <div>
-                        <h2 class="text-lg font-semibold">Analytics</h2>
+                        <h2 class="text-lg font-semibold">
+                            {translate($locale, "analytics.title")}
+                        </h2>
 
                         <p class="mt-1 text-sm text-slate-500">
-                            Live activity collected for this event.
+                            {translate($locale, "analytics.liveDescription")}
                         </p>
                     </div>
                 </div>
@@ -754,7 +767,7 @@
                         <div
                             class="text-xs font-medium uppercase tracking-wider text-slate-600"
                         >
-                            Scans / opens
+                            {translate($locale, "analytics.scansOpens")}
                         </div>
 
                         <div class="mt-3 text-3xl font-semibold">
@@ -768,7 +781,7 @@
                         <div
                             class="text-xs font-medium uppercase tracking-wider text-slate-600"
                         >
-                            Unique visitors
+                            {translate($locale, "analytics.uniqueVisitors")}
                         </div>
 
                         <div class="mt-3 text-3xl font-semibold">
@@ -782,7 +795,7 @@
                         <div
                             class="text-xs font-medium uppercase tracking-wider text-slate-600"
                         >
-                            Current votes
+                            {translate($locale, "analytics.currentVotes")}
                         </div>
 
                         <div class="mt-3 text-3xl font-semibold">
@@ -796,7 +809,7 @@
                         <div
                             class="text-xs font-medium uppercase tracking-wider text-slate-600"
                         >
-                            Conversion
+                            {translate($locale, "analytics.conversion")}
                         </div>
 
                         <div class="mt-3 text-3xl font-semibold">
@@ -810,7 +823,7 @@
                         <div
                             class="text-xs font-medium uppercase tracking-wider text-slate-600"
                         >
-                            Vote changes
+                            {translate($locale, "analytics.voteChanges")}
                         </div>
 
                         <div class="mt-3 text-3xl font-semibold">
@@ -1209,21 +1222,20 @@
                         <div
                             class="mb-3 inline-flex rounded-full border border-fuchsia-400/15 bg-fuchsia-400/10 px-3 py-1 text-xs font-medium text-fuchsia-300"
                         >
-                            Event intelligence
+                            {translate($locale, "analytics.intelligence")}
                         </div>
 
                         <h2
                             id="analyse-title"
                             class="text-2xl font-semibold tracking-tight"
                         >
-                            Analyse
+                            {translate($locale, "analytics.analyse")}
                         </h2>
 
                         <p
                             class="mt-2 max-w-2xl text-sm leading-6 text-slate-500"
                         >
-                            Entry performance, recent activity and lightweight
-                            signals that may be worth reviewing.
+                            {translate($locale, "analytics.analyseDescription")}
                         </p>
                     </div>
 
@@ -1232,7 +1244,7 @@
                         onclick={exportAnalyticsCsv}
                         class="w-fit shrink-0 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
                     >
-                        Export CSV
+                        {translate($locale, "analytics.exportCsv")}
                     </button>
                 </div>
 
@@ -1240,17 +1252,22 @@
                     class="mt-7 grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]"
                 >
                     <div>
-                        <h3 class="text-lg font-semibold">Entry performance</h3>
+                        <h3 class="text-lg font-semibold">
+                            {translate($locale, "analytics.entryPerformance")}
+                        </h3>
 
                         <p class="mt-1 text-sm text-slate-500">
-                            Ranked by current votes, then visitors and scans.
+                            {translate(
+                                $locale,
+                                "analytics.entryPerformanceDescription",
+                            )}
                         </p>
 
                         {#if entries.length === 0}
                             <div
                                 class="mt-5 rounded-2xl border border-dashed border-white/10 px-5 py-10 text-center text-sm text-slate-600"
                             >
-                                No entries to analyse yet.
+                                {translate($locale, "analytics.noEntries")}
                             </div>
                         {:else}
                             <div class="mt-5 space-y-3">
@@ -1283,7 +1300,14 @@
                                                     <div
                                                         class="mt-1 text-xs text-slate-600"
                                                     >
-                                                        Entry #{item.entry.id}
+                                                        {translate(
+                                                            $locale,
+                                                            "analytics.entryId",
+                                                            {
+                                                                id: item.entry
+                                                                    .id,
+                                                            },
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -1324,7 +1348,10 @@
                                                 <div
                                                     class="mt-1 text-xs text-slate-600"
                                                 >
-                                                    Vote share
+                                                    {translate(
+                                                        $locale,
+                                                        "analytics.voteShare",
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -1340,7 +1367,10 @@
                                                 <div
                                                     class="mt-1 text-xs text-slate-600"
                                                 >
-                                                    Scans
+                                                    {translate(
+                                                        $locale,
+                                                        "analytics.scans",
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -1357,7 +1387,10 @@
                                                 <div
                                                     class="mt-1 text-xs text-slate-600"
                                                 >
-                                                    Visitors
+                                                    {translate(
+                                                        $locale,
+                                                        "analytics.visitors",
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -1394,13 +1427,19 @@
                             >
                                 <div>
                                     <h3 class="font-semibold">
-                                        Review signals
+                                        {translate(
+                                            $locale,
+                                            "analytics.reviewSignals",
+                                        )}
                                     </h3>
 
                                     <p
                                         class="mt-1 text-xs leading-5 text-slate-600"
                                     >
-                                        Heuristics only — not proof of abuse.
+                                        {translate(
+                                            $locale,
+                                            "analytics.reviewSignalsDescription",
+                                        )}
                                     </p>
                                 </div>
 
@@ -1418,14 +1457,19 @@
                                     <div
                                         class="text-sm font-medium text-emerald-300"
                                     >
-                                        No unusual activity signals.
+                                        {translate(
+                                            $locale,
+                                            "analytics.noSignals",
+                                        )}
                                     </div>
 
                                     <p
                                         class="mt-1 text-xs leading-5 text-slate-500"
                                     >
-                                        Nothing currently crosses the review
-                                        thresholds.
+                                        {translate(
+                                            $locale,
+                                            "analytics.noSignalsDescription",
+                                        )}
                                     </p>
                                 </div>
                             {:else}
@@ -1446,11 +1490,16 @@
                                                 <div
                                                     class="shrink-0 font-mono text-xs text-amber-300"
                                                 >
-                                                    {signal.affected_visitors}
-                                                    {signal.affected_visitors ===
-                                                    1
-                                                        ? "visitor"
-                                                        : "visitors"}
+                                                    {translate(
+                                                        $locale,
+                                                        signal.affected_visitors ===
+                                                            1
+                                                            ? "analytics.visitorOne"
+                                                            : "analytics.visitorMany",
+                                                        {
+                                                            count: signal.affected_visitors,
+                                                        },
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -1468,17 +1517,25 @@
                         <article
                             class="rounded-2xl border border-white/10 bg-slate-950/40 p-5"
                         >
-                            <h3 class="font-semibold">Recent activity</h3>
+                            <h3 class="font-semibold">
+                                {translate($locale, "analytics.recentActivity")}
+                            </h3>
 
                             <p class="mt-1 text-xs leading-5 text-slate-600">
-                                Latest scans and voting actions.
+                                {translate(
+                                    $locale,
+                                    "analytics.recentActivityDescription",
+                                )}
                             </p>
 
                             {#if analytics.recent_activity.length === 0}
                                 <div
                                     class="mt-5 rounded-xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-slate-600"
                                 >
-                                    No public activity yet.
+                                    {translate(
+                                        $locale,
+                                        "analytics.noRecentActivity",
+                                    )}
                                 </div>
                             {:else}
                                 <div class="mt-5 space-y-2">
@@ -1513,7 +1570,13 @@
                                                     {new Date(
                                                         activity.created_at *
                                                             1000,
-                                                    ).toLocaleString()}
+                                                    ).toLocaleString(
+                                                        $locale === "hu"
+                                                            ? "hu-HU"
+                                                            : $locale === "de"
+                                                              ? "de-DE"
+                                                              : "en-US",
+                                                    )}
                                                 </time>
                                             </div>
                                         </div>
