@@ -12,7 +12,7 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
-    "e2e:backend": "node ./e2e/prepare.mjs && cargo run --manifest-path ../../Cargo.toml -p crumbvote-server"
+    "e2e:backend": "node ./e2e/prepare.mjs && npm run build && cargo run --manifest-path ../../Cargo.toml -p crumbvote-server"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

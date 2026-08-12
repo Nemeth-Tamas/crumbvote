@@ -10,11 +10,14 @@ use crumbvote_database::DatabaseConnection;
 use serde::Serialize;
 use std::{
     error::Error,
+    path::PathBuf,
     sync::{Arc, Mutex},
 };
-use tower_http::services::ServeDir;
+use tower_http::services::{ServeDir, ServeFile};
 
 const DEFAULT_LISTEN_ADDRESS: &str = "0.0.0.0:3000";
+
+const DEFAULT_WEB_DIRECTORY: &str = "apps/web/dist";
 
 const DEFAULT_DATABASE_URL: &str = "sqlite://data/crumbvote.sqlite?mode=rwc";
 
@@ -46,6 +49,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let database_url =
         std::env::var("CRUMBVOTE_DATABASE_URL").unwrap_or_else(|_| DEFAULT_DATABASE_URL.to_owned());
+
+    let web_directory = PathBuf::from(
+        std::env::var("CRUMBVOTE_WEB_DIRECTORY")
+            .unwrap_or_else(|_| DEFAULT_WEB_DIRECTORY.to_owned()),
+    );
 
     let database = crumbvote_database::connect(&database_url).await?;
 
@@ -95,11 +103,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .merge(entries::router())
         .merge(analytics::router());
 
+    let api = Router::new()
+        .nest("/admin", admin_api)
+        .nest("/public", public_api::router())
+        .fallback(|| async { StatusCode::NOT_FOUND });
+
+    let web_service =
+        ServeDir::new(&web_directory).fallback(ServeFile::new(web_directory.join("index.html")));
+
     let app = Router::new()
         .route("/health", get(health))
-        .nest("/api/admin", admin_api)
-        .nest("/api/public", public_api::router())
+        .nest("/api", api)
         .nest_service("/media/entries", ServeDir::new(ENTRY_IMAGE_DIRECTORY))
+        .fallback_service(web_service)
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(&listen_address).await?;

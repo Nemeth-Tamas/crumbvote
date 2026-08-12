@@ -60,6 +60,8 @@ export default defineConfig({
                     '127.0.0.1:3100',
                 CRUMBVOTE_DATABASE_URL:
                     'sqlite://data/crumbvote-e2e.sqlite?mode=rwc',
+                CRUMBVOTE_WEB_DIRECTORY:
+                    'dist',
                 CRUMBVOTE_E2E_SETUP_CODE:
                     setupCode,
             },
